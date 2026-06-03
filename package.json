@@ -1,16 +1,24 @@
 {
-  "name": "nodejs-expressjs",
+  "name": "nodejs-cms-blog",
   "version": "1.0.0",
-  "description": "",
+  "description": "A full-featured blog CMS built with Express.js 5, MongoDB, and EJS",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vinodrajbhar/nodejs-cms-blog.git"
+  },
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/server.js",
     "seed": "node src/database/seeds/seed.js",
     "start": "node src/server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["cms", "blog", "express", "mongodb", "ejs", "content-management"],
+  "author": "Vinod Rajbhar",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Vinodrajbhar/nodejs-cms-blog/issues"
+  },
+  "homepage": "https://github.com/Vinodrajbhar/nodejs-cms-blog#readme",
   "type": "module",
   "dependencies": {
     "bcryptjs": "^3.0.3",

@@ -38,6 +38,7 @@ Comprehensive guide for developers working on, extending, or integrating with th
 ```
 
 The CMS follows a classic **MVC** pattern:
+
 - **Models** — Mongoose schemas in `src/models/`
 - **Views** — EJS templates in `src/views/` + theme overrides
 - **Controllers** — Route handlers in `src/controllers/`
@@ -67,7 +68,7 @@ Request
 
 ```
 nodejs-expressjs/
-├── server.js                         # App entry point
+├── src/server.js                     # App entry point
 ├── package.json
 ├── eslint.config.js
 ├── .env                              # Environment variables
@@ -174,28 +175,28 @@ nodejs-expressjs/
 
 ### Runtime
 
-| Package            | Version | Purpose                              |
-|--------------------|---------|--------------------------------------|
-| `express`          | ^5.2.1  | Web framework                        |
-| `mongoose`         | ^9.6.3  | MongoDB ODM                          |
-| `ejs`              | ^6.0.1  | Template engine                      |
-| `bcryptjs`         | ^3.0.3  | Password hashing                     |
-| `express-session`  | ^1.19.0 | Session management                   |
-| `connect-mongo`    | ^6.0.0  | MongoDB session store                |
-| `helmet`           | ^8.2.0  | Security HTTP headers                |
-| `compression`      | ^1.8.1  | Gzip response compression            |
-| `multer`           | ^2.1.1  | File upload handling                 |
-| `sharp`            | ^0.34.5 | Image processing (thumbnails)        |
-| `dotenv`           | ^17.4.2 | Environment variable loading         |
+| Package           | Version | Purpose                       |
+| ----------------- | ------- | ----------------------------- |
+| `express`         | ^5.2.1  | Web framework                 |
+| `mongoose`        | ^9.6.3  | MongoDB ODM                   |
+| `ejs`             | ^6.0.1  | Template engine               |
+| `bcryptjs`        | ^3.0.3  | Password hashing              |
+| `express-session` | ^1.19.0 | Session management            |
+| `connect-mongo`   | ^6.0.0  | MongoDB session store         |
+| `helmet`          | ^8.2.0  | Security HTTP headers         |
+| `compression`     | ^1.8.1  | Gzip response compression     |
+| `multer`          | ^2.1.1  | File upload handling          |
+| `sharp`           | ^0.34.5 | Image processing (thumbnails) |
+| `dotenv`          | ^17.4.2 | Environment variable loading  |
 
 ### Dev
 
-| Package                    | Purpose                      |
-|----------------------------|------------------------------|
-| `nodemon`                  | Auto-restart on file changes |
-| `eslint`                   | Code linting                 |
-| `prettier`                 | Code formatting              |
-| `eslint-config-prettier`   | ESLint + Prettier integration|
+| Package                  | Purpose                       |
+| ------------------------ | ----------------------------- |
+| `nodemon`                | Auto-restart on file changes  |
+| `eslint`                 | Code linting                  |
+| `prettier`               | Code formatting               |
+| `eslint-config-prettier` | ESLint + Prettier integration |
 
 ---
 
@@ -203,37 +204,37 @@ nodejs-expressjs/
 
 ### 1. User
 
-| Field    | Type   | Notes                                |
-|----------|--------|--------------------------------------|
-| username | String | Unique, min 3 chars                  |
-| email    | String | Unique, lowercase                    |
+| Field    | Type   | Notes                               |
+| -------- | ------ | ----------------------------------- |
+| username | String | Unique, min 3 chars                 |
+| email    | String | Unique, lowercase                   |
 | password | String | Min 6 chars, auto-hashed via bcrypt |
-| role     | Enum   | `admin`, `editor`, or `author`       |
+| role     | Enum   | `admin`, `editor`, or `author`      |
 
 **Methods:** `comparePassword(password)`, `toJSON()` (excludes password)
 
 ### 2. Post
 
-| Field             | Type       | Notes                        |
-|-------------------|------------|------------------------------|
-| title             | String     | Required, trimmed            |
-| slug              | String     | Unique, lowercase            |
-| content           | String     | HTML content                 |
-| excerpt           | String     | Max 500 chars                |
-| featuredImage     | String     | URL path                     |
-| author            | ObjectId   | Ref → User                   |
-| categories        | [ObjectId] | Ref → Category[]             |
-| tags              | [ObjectId] | Ref → Tag[]                  |
-| status            | Enum       | `draft`, `published`, `scheduled` |
-| publishedAt       | Date       |                              |
-| scheduledAt       | Date       |                              |
-| seoTitle          | String     |                              |
-| metaDescription   | String     | Max 160 chars                |
-| focusKeyphrase    | String     |                              |
-| ogImage / ogTitle / ogDescription | String | Open Graph        |
-| canonicalUrl      | String     |                              |
-| noindex           | Boolean    |                              |
-| breadcrumbTitle   | String     |                              |
+| Field                             | Type       | Notes                             |
+| --------------------------------- | ---------- | --------------------------------- |
+| title                             | String     | Required, trimmed                 |
+| slug                              | String     | Unique, lowercase                 |
+| content                           | String     | HTML content                      |
+| excerpt                           | String     | Max 500 chars                     |
+| featuredImage                     | String     | URL path                          |
+| author                            | ObjectId   | Ref → User                        |
+| categories                        | [ObjectId] | Ref → Category[]                  |
+| tags                              | [ObjectId] | Ref → Tag[]                       |
+| status                            | Enum       | `draft`, `published`, `scheduled` |
+| publishedAt                       | Date       |                                   |
+| scheduledAt                       | Date       |                                   |
+| seoTitle                          | String     |                                   |
+| metaDescription                   | String     | Max 160 chars                     |
+| focusKeyphrase                    | String     |                                   |
+| ogImage / ogTitle / ogDescription | String     | Open Graph                        |
+| canonicalUrl                      | String     |                                   |
+| noindex                           | Boolean    |                                   |
+| breadcrumbTitle                   | String     |                                   |
 
 ### 3. Page
 
@@ -241,71 +242,73 @@ Same SEO fields as Post. No categories or tags. Status: `draft` or `published`.
 
 ### 4. Category
 
-| Field       | Type    | Notes              |
-|-------------|---------|--------------------|
-| name        | String  | Required           |
-| slug        | String  | Unique             |
-| description | String  |                    |
-| postCount   | Number  | Denormalized count |
-| seoTitle / metaDescription / noindex / ogImage | | SEO fields |
+| Field                                          | Type   | Notes              |
+| ---------------------------------------------- | ------ | ------------------ |
+| name                                           | String | Required           |
+| slug                                           | String | Unique             |
+| description                                    | String |                    |
+| postCount                                      | Number | Denormalized count |
+| seoTitle / metaDescription / noindex / ogImage |        | SEO fields         |
 
 ### 5. Tag
 
-| Field       | Type    | Notes              |
-|-------------|---------|--------------------|
-| name        | String  | Required           |
-| slug        | String  | Unique             |
-| postCount   | Number  | Denormalized count |
-| seoTitle / metaDescription / noindex | | SEO fields |
+| Field                                | Type   | Notes              |
+| ------------------------------------ | ------ | ------------------ |
+| name                                 | String | Required           |
+| slug                                 | String | Unique             |
+| postCount                            | Number | Denormalized count |
+| seoTitle / metaDescription / noindex |        | SEO fields         |
 
 ### 6. Comment
 
-| Field      | Type        | Notes                         |
-|------------|-------------|-------------------------------|
-| post       | ObjectId    | Ref → Post                    |
-| author     | Embedded    | `{ name, email, website }`    |
-| content    | String      |                               |
-| status     | Enum        | `pending`, `approved`, `spam` |
+| Field   | Type     | Notes                         |
+| ------- | -------- | ----------------------------- |
+| post    | ObjectId | Ref → Post                    |
+| author  | Embedded | `{ name, email, website }`    |
+| content | String   |                               |
+| status  | Enum     | `pending`, `approved`, `spam` |
 
 ### 7. Media
 
-| Field         | Type      | Notes            |
-|---------------|-----------|------------------|
-| originalName  | String    |                  |
-| filename      | String    | Server filename  |
-| path          | String    | File path        |
-| thumbnailPath | String    | 300x200 JPEG     |
-| mimeType      | String    |                  |
-| size          | Number    | Bytes            |
-| uploadedBy    | ObjectId  | Ref → User       |
-| altText / caption / description | String | SEO fields |
+| Field                           | Type     | Notes           |
+| ------------------------------- | -------- | --------------- |
+| originalName                    | String   |                 |
+| filename                        | String   | Server filename |
+| path                            | String   | File path       |
+| thumbnailPath                   | String   | 300x200 JPEG    |
+| mimeType                        | String   |                 |
+| size                            | Number   | Bytes           |
+| uploadedBy                      | ObjectId | Ref → User      |
+| altText / caption / description | String   | SEO fields      |
 
 ### 8. Setting (Key-Value Store)
 
-| Field | Type   | Notes                |
-|-------|--------|----------------------|
-| key   | String | Unique               |
-| value | Mixed  | Any JSON-serializable|
+| Field | Type   | Notes                 |
+| ----- | ------ | --------------------- |
+| key   | String | Unique                |
+| value | Mixed  | Any JSON-serializable |
 
 **Static Methods:**
+
 - `Setting.getSettings()` — Returns all settings as `{ key: value }` object
 - `Setting.getSetting(key, default)` — Get a single setting with fallback
 - `Setting.setSetting(key, value)` — Upsert a setting
 
 ### 9. Theme
 
-| Field      | Type    | Notes                              |
-|------------|---------|------------------------------------|
-| name       | String  |                                    |
-| slug       | String  | Unique, lowercase                  |
-| description| String  |                                    |
-| author     | String  |                                    |
-| version    | String  | Default `1.0.0`                   |
-| isActive   | Boolean | Only one theme active at a time    |
-| customCss  | String  | Custom CSS entered via admin       |
-| customJs   | String  | Custom JS entered via admin        |
+| Field       | Type    | Notes                           |
+| ----------- | ------- | ------------------------------- |
+| name        | String  |                                 |
+| slug        | String  | Unique, lowercase               |
+| description | String  |                                 |
+| author      | String  |                                 |
+| version     | String  | Default `1.0.0`                 |
+| isActive    | Boolean | Only one theme active at a time |
+| customCss   | String  | Custom CSS entered via admin    |
+| customJs    | String  | Custom JS entered via admin     |
 
 **Key Static Methods:**
+
 - `Theme.getActive()` — Returns active theme document
 - `Theme.activate(slug)` — Deactivates all, activates one
 - `Theme.scanDirectory()` — Scans `themes/` folder for theme manifests
@@ -314,16 +317,16 @@ Same SEO fields as Post. No categories or tags. Status: `draft` or `published`.
 
 ### 10. AuditLog
 
-| Field         | Type      | Notes                                |
-|---------------|-----------|--------------------------------------|
-| action        | Enum      | `create`, `update`, `delete`, `login`, `logout`, `upload`, `approve`, `spam` |
-| entity        | Enum      | `post`, `page`, `category`, `tag`, `media`, `comment`, `user`, `setting`, `theme` |
-| entityId      | ObjectId  |                                      |
-| description   | String    |                                      |
-| performedBy   | ObjectId  | Ref → User                           |
-| performerName | String    | Denormalized username                |
-| ip            | String    |                                      |
-| metadata      | Mixed     | Extra data                           |
+| Field         | Type     | Notes                                                                             |
+| ------------- | -------- | --------------------------------------------------------------------------------- |
+| action        | Enum     | `create`, `update`, `delete`, `login`, `logout`, `upload`, `approve`, `spam`      |
+| entity        | Enum     | `post`, `page`, `category`, `tag`, `media`, `comment`, `user`, `setting`, `theme` |
+| entityId      | ObjectId |                                                                                   |
+| description   | String   |                                                                                   |
+| performedBy   | ObjectId | Ref → User                                                                        |
+| performerName | String   | Denormalized username                                                             |
+| ip            | String   |                                                                                   |
+| metadata      | Mixed    | Extra data                                                                        |
 
 **Static Method:** `AuditLog.log({ action, entity, entityId, description, req, metadata })` — Creates an audit entry with IP and user info automatically extracted from the request.
 
@@ -333,14 +336,14 @@ Same SEO fields as Post. No categories or tags. Status: `draft` or `published`.
 
 ### Public Routes (`src/routes/index.js`)
 
-| Method | Path              | Handler               | Description              |
-|--------|-------------------|-----------------------|--------------------------|
-| GET    | `/`               | `getHome`             | Homepage (paginated)     |
-| GET    | `/search`         | `search`              | Search results           |
-| GET    | `/robots.txt`     | Inline                | Dynamic robots.txt       |
-| GET    | `/feed.xml`       | Inline                | RSS feed (20 posts)      |
-| GET    | `/sitemap.xml`    | Inline                | XML sitemap              |
-| GET    | `/:params*`       | `permalinkCatchAll`   | Permalink-based routing  |
+| Method | Path           | Handler             | Description             |
+| ------ | -------------- | ------------------- | ----------------------- |
+| GET    | `/`            | `getHome`           | Homepage (paginated)    |
+| GET    | `/search`      | `search`            | Search results          |
+| GET    | `/robots.txt`  | Inline              | Dynamic robots.txt      |
+| GET    | `/feed.xml`    | Inline              | RSS feed (20 posts)     |
+| GET    | `/sitemap.xml` | Inline              | XML sitemap             |
+| GET    | `/:params*`    | `permalinkCatchAll` | Permalink-based routing |
 
 The permalink catch-all router (`src/middleware/permalink.js`) resolves URLs based on the configured permalink structure. It dynamically builds regex patterns from structure tags and matches against the request path to determine whether it's a post, page, category, or tag.
 
@@ -358,26 +361,26 @@ The `permalinkCatchAll` middleware handles URL resolution in this order:
 
 All admin routes are prefixed with `/admin` and require authentication.
 
-| Area       | Path Pattern                          | Auth Required     |
-|------------|---------------------------------------|-------------------|
-| Dashboard  | `/`                                   | `requireAuth`     |
-| Posts      | `/posts`, `/posts/new`, `/posts/:id/*`| `requireAuth`     |
-| Pages      | `/pages`, `/pages/new`, `/pages/:id/*`| `requireAuth`     |
-| Categories | `/categories`, `/categories/:id/*`    | `requireAuth`     |
-| Tags       | `/tags`, `/tags/:id/*`                | `requireAuth`     |
-| Comments   | `/comments`, `/comments/:id/*`        | `requireAuth`     |
-| Media      | `/media`, `/media/*`                  | `requireAuth`     |
-| Navigation | `/navigation`                         | Admin only        |
-| Themes     | `/themes`, `/themes/:id/*`            | Admin only        |
-| Settings   | `/settings`                           | Admin only        |
-| Users      | `/users`, `/users/:id/*`              | Admin only        |
-| Audit Logs | `/audit-logs`                         | Admin only        |
+| Area       | Path Pattern                           | Auth Required |
+| ---------- | -------------------------------------- | ------------- |
+| Dashboard  | `/`                                    | `requireAuth` |
+| Posts      | `/posts`, `/posts/new`, `/posts/:id/*` | `requireAuth` |
+| Pages      | `/pages`, `/pages/new`, `/pages/:id/*` | `requireAuth` |
+| Categories | `/categories`, `/categories/:id/*`     | `requireAuth` |
+| Tags       | `/tags`, `/tags/:id/*`                 | `requireAuth` |
+| Comments   | `/comments`, `/comments/:id/*`         | `requireAuth` |
+| Media      | `/media`, `/media/*`                   | `requireAuth` |
+| Navigation | `/navigation`                          | Admin only    |
+| Themes     | `/themes`, `/themes/:id/*`             | Admin only    |
+| Settings   | `/settings`                            | Admin only    |
+| Users      | `/users`, `/users/:id/*`               | Admin only    |
+| Audit Logs | `/audit-logs`                          | Admin only    |
 
 ### API Routes (`src/routes/api.js`)
 
-| Method | Path              | Description                       |
-|--------|-------------------|-----------------------------------|
-| POST   | `/api/comments`   | Submit a comment (JSON or form)   |
+| Method | Path            | Description                     |
+| ------ | --------------- | ------------------------------- |
+| POST   | `/api/comments` | Submit a comment (JSON or form) |
 
 The comments endpoint supports both AJAX (returns JSON) and regular form POST (redirects back).
 
@@ -389,19 +392,20 @@ The comments endpoint supports both AJAX (returns JSON) and regular form POST (r
 
 **Key Functions:**
 
-| Function           | Description                                    |
-|--------------------|------------------------------------------------|
-| `getSiteData()`    | Fetches site-wide data (settings, categories, tags, pages). Used by all public views. |
-| `seoMeta(siteData, overrides)` | Generates SEO meta object (title, OG, Twitter, schema). |
-| `publishedFilter()` | Returns MongoDB filter for published/scheduled posts |
-| `getHome()`        | Renders homepage with paginated posts          |
-| `getPost()`        | Renders single post with comments              |
-| `getPage()`        | Renders single page                            |
-| `getCategory()`    | Renders paginated posts filtered by category   |
-| `getTag()`         | Renders paginated posts filtered by tag        |
-| `search()`         | Full-text search on title, content, excerpt    |
+| Function                       | Description                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------- |
+| `getSiteData()`                | Fetches site-wide data (settings, categories, tags, pages). Used by all public views. |
+| `seoMeta(siteData, overrides)` | Generates SEO meta object (title, OG, Twitter, schema).                               |
+| `publishedFilter()`            | Returns MongoDB filter for published/scheduled posts                                  |
+| `getHome()`                    | Renders homepage with paginated posts                                                 |
+| `getPost()`                    | Renders single post with comments                                                     |
+| `getPage()`                    | Renders single page                                                                   |
+| `getCategory()`                | Renders paginated posts filtered by category                                          |
+| `getTag()`                     | Renders paginated posts filtered by tag                                               |
+| `search()`                     | Full-text search on title, content, excerpt                                           |
 
 **Pattern: `getSiteData()`** returns:
+
 ```js
 {
   siteName, categories, tags, pages,
@@ -418,13 +422,22 @@ The comments endpoint supports both AJAX (returns JSON) and regular form POST (r
 ```
 
 **Pattern: `seoMeta()`** output includes:
+
 ```js
 {
-  pageSeoTitle, pageMetaDescription,
-  pageOgTitle, pageOgDescription, pageOgImage,
-  pageCanonical, pageNoindex,
-  ogType, twitterCardType,
-  pageSchema, searchUrl, siteUrl, twitterUsername
+  (pageSeoTitle,
+    pageMetaDescription,
+    pageOgTitle,
+    pageOgDescription,
+    pageOgImage,
+    pageCanonical,
+    pageNoindex,
+    ogType,
+    twitterCardType,
+    pageSchema,
+    searchUrl,
+    siteUrl,
+    twitterUsername);
 }
 ```
 
@@ -456,21 +469,22 @@ Full CRUD for all content entities. Common patterns:
 
 ### auth.js
 
-| Middleware        | Description                                               |
-|-------------------|-----------------------------------------------------------|
-| `requireAuth`     | Redirects to `/admin/login` if no session                 |
-| `requireRole(...)`| Returns 403 if user role not in the allowed list          |
-| `setLocals`       | Exposes `currentUser` (`{ id, username, role }`) to views |
+| Middleware         | Description                                               |
+| ------------------ | --------------------------------------------------------- |
+| `requireAuth`      | Redirects to `/admin/login` if no session                 |
+| `requireRole(...)` | Returns 403 if user role not in the allowed list          |
+| `setLocals`        | Exposes `currentUser` (`{ id, username, role }`) to views |
 
 ### security.js
 
-| Middleware             | Description                                              |
-|------------------------|----------------------------------------------------------|
-| `csrfProtection`       | Generates CSRF token, validates on mutating methods, refreshes after success |
-| `rateLimiter(windowMs, max)` | In-memory rate limiter with `X-RateLimit-*` headers |
-| `strictRateLimiter`    | Pre-configured strict limiter for `/admin/login`         |
+| Middleware                   | Description                                                                  |
+| ---------------------------- | ---------------------------------------------------------------------------- |
+| `csrfProtection`             | Generates CSRF token, validates on mutating methods, refreshes after success |
+| `rateLimiter(windowMs, max)` | In-memory rate limiter with `X-RateLimit-*` headers                          |
+| `strictRateLimiter`          | Pre-configured strict limiter for `/admin/login`                             |
 
 **CSRF token flow:**
+
 1. Token generated on first visit, stored in `req.session.csrfToken`
 2. Exposed to views via `res.locals.csrfToken`
 3. POST/PUT/PATCH/DELETE requests validated against `req.body._csrf` or `X-CSRF-Token` header
@@ -478,11 +492,11 @@ Full CRUD for all content entities. Common patterns:
 
 ### theme.js
 
-| Middleware / Function       | Description                                         |
-|----------------------------|-----------------------------------------------------|
-| `injectThemeData`          | Injects `activeTheme` + `themeAssets` into all views|
-| `rebuildThemeViews(app, defaultViewsPath)` | Rebuilds Express `views` array from active theme |
-| `getThemeViewsPaths(slug, defaultViewsPath)` | Returns `[themeViews, defaultViews]` |
+| Middleware / Function                        | Description                                          |
+| -------------------------------------------- | ---------------------------------------------------- |
+| `injectThemeData`                            | Injects `activeTheme` + `themeAssets` into all views |
+| `rebuildThemeViews(app, defaultViewsPath)`   | Rebuilds Express `views` array from active theme     |
+| `getThemeViewsPaths(slug, defaultViewsPath)` | Returns `[themeViews, defaultViews]`                 |
 
 ### permalink.js
 
@@ -516,6 +530,7 @@ public_footer.ejs   ────┘
 ```
 
 The public header (`public_header.ejs`) includes:
+
 - Dynamic `<title>` tag (SEO-aware with separator)
 - Meta description, canonical URL, robots
 - Open Graph tags (og:title, og:description, og:image)
@@ -525,6 +540,7 @@ The public header (`public_header.ejs`) includes:
 - Theme CSS/JS injection
 
 The admin layout (`admin.ejs`) includes:
+
 - Collapsible sidebar with icon navigation
 - Dark mode support
 - Current user display
@@ -533,10 +549,12 @@ The admin layout (`admin.ejs`) includes:
 ### Available View Locals
 
 **All views (from `setLocals`):**
+
 - `currentUser` — `{ id, username, role }` or `null`
 - `path` — Current request path
 
 **Public views (from `getSiteData`):**
+
 - `siteName`, `categories`, `tags`, `pages`
 - `siteTagline`, `titleSeparator`, `siteUrl`
 - `navItems`, `navAutoPages`
@@ -544,6 +562,7 @@ The admin layout (`admin.ejs`) includes:
 - `permalinkStructure`, `categoryBase`, `tagBase`
 
 **SEO locals (from `seoMeta`):**
+
 - `pageSeoTitle`, `pageMetaDescription`
 - `pageOgTitle`, `pageOgDescription`, `pageOgImage`
 - `pageCanonical`, `pageNoindex`
@@ -552,6 +571,7 @@ The admin layout (`admin.ejs`) includes:
 - `searchUrl`, `twitterUsername`
 
 **Theme locals (from `injectThemeData`):**
+
 - `activeTheme` — Active theme document
 - `themeAssets` — `{ css, js, hasCss, hasJs }`
 
@@ -597,6 +617,7 @@ themes/my-theme/
 ```
 
 **`theme.json` format:**
+
 ```json
 {
   "name": "My Theme",
@@ -616,6 +637,7 @@ themes/my-theme/
 ### Activating a Theme
 
 From the admin panel at `/admin/themes`, click "Activate" on any theme. This:
+
 1. Deactivates all other themes in the DB
 2. Sets the active theme
 3. Rebuilds the Express `views` array to include the theme's view directory
@@ -636,16 +658,17 @@ The CMS includes a comprehensive SEO framework inspired by WordPress SEO plugins
 
 The following entities have dedicated SEO fields:
 
-| Entity     | Fields                                                       |
-|------------|--------------------------------------------------------------|
-| Post       | seoTitle, metaDescription, focusKeyphrase, ogImage, ogTitle, ogDescription, canonicalUrl, noindex, breadcrumbTitle |
-| Page       | Same as Post                                                 |
-| Category   | seoTitle, metaDescription, noindex, ogImage                  |
-| Tag        | seoTitle, metaDescription, noindex                           |
+| Entity   | Fields                                                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------------------------ |
+| Post     | seoTitle, metaDescription, focusKeyphrase, ogImage, ogTitle, ogDescription, canonicalUrl, noindex, breadcrumbTitle |
+| Page     | Same as Post                                                                                                       |
+| Category | seoTitle, metaDescription, noindex, ogImage                                                                        |
+| Tag      | seoTitle, metaDescription, noindex                                                                                 |
 
 ### Global SEO Settings
 
 Configured in Admin → Settings:
+
 - Homepage SEO title & meta description
 - Default OG image (fallback for all pages)
 - Site-wide noindex toggle
@@ -679,12 +702,14 @@ const meta = seoMeta(siteData, {
 ### Dynamic robots.txt
 
 Generated based on the `noindexSite` setting. When enabled, produces:
+
 ```
 User-agent: *
 Disallow: /
 ```
 
 Otherwise:
+
 ```
 User-agent: *
 Allow: /
@@ -695,6 +720,7 @@ Disallow: /api
 ### Sitemap
 
 Auto-generated XML sitemap at `/sitemap.xml` includes:
+
 - All published posts (with lastmod dates)
 - All published pages
 - All categories
@@ -708,25 +734,25 @@ The permalink system provides WordPress-compatible URL structures.
 
 ### Structure Tags
 
-| Tag             | Regex Pattern              |
-|-----------------|----------------------------|
-| `%postname%`    | `(?<postname>[^/]+)`       |
-| `%post_id%`     | `(?<post_id>\d+)`          |
-| `%year%`        | `(?<year>\d{4})`           |
-| `%monthnum%`    | `(?<monthnum>0[1-9]\|1[0-2])` |
-| `%day%`         | `(?<day>0[1-9]\|[12]\d\|3[01])` |
-| `%category%`    | `(?<category>[^/]+)`       |
-| `%author%`      | `(?<author>[^/]+)`         |
+| Tag          | Regex Pattern                   |
+| ------------ | ------------------------------- |
+| `%postname%` | `(?<postname>[^/]+)`            |
+| `%post_id%`  | `(?<post_id>\d+)`               |
+| `%year%`     | `(?<year>\d{4})`                |
+| `%monthnum%` | `(?<monthnum>0[1-9]\|1[0-2])`   |
+| `%day%`      | `(?<day>0[1-9]\|[12]\d\|3[01])` |
+| `%category%` | `(?<category>[^/]+)`            |
+| `%author%`   | `(?<author>[^/]+)`              |
 
 ### Preset Structures
 
-| Preset       | Pattern                              |
-|--------------|--------------------------------------|
-| default      | `/post/%postname%/`                  |
-| postname     | `/%postname%/`                       |
-| day_name     | `/%year%/%monthnum%/%day%/%postname%/` |
-| month_name   | `/%year%/%monthnum%/%postname%/`     |
-| numeric      | `/archives/%post_id%/`               |
+| Preset     | Pattern                                |
+| ---------- | -------------------------------------- |
+| default    | `/post/%postname%/`                    |
+| postname   | `/%postname%/`                         |
+| day_name   | `/%year%/%monthnum%/%day%/%postname%/` |
+| month_name | `/%year%/%monthnum%/%postname%/`       |
+| numeric    | `/archives/%post_id%/`                 |
 
 ### URL Generation Functions
 
@@ -745,22 +771,23 @@ When the permalink structure changes, the system saves the old structure and cre
 
 ## Security Features
 
-| Feature               | Implementation                                     |
-|-----------------------|----------------------------------------------------|
-| Password hashing      | bcrypt with salt rounds = 12                       |
+| Feature               | Implementation                                       |
+| --------------------- | ---------------------------------------------------- |
+| Password hashing      | bcrypt with salt rounds = 12                         |
 | Session security      | httpOnly cookies, secure in production, sameSite=lax |
-| Session fixation      | `session.regenerate()` on login                    |
-| CSRF protection       | Token in session, validated on mutating methods    |
-| Rate limiting         | In-memory store, configurable window/max           |
-| File upload security  | Magic bytes validation + MIME type check           |
-| HTTP security headers | Helmet with custom CSP                             |
-| XSS prevention        | EJS auto-escapes output (`<%= %>`)                 |
-| SQL injection         | N/A (Mongoose + prepared statements)               |
-| Role-based access     | `requireAuth` + `requireRole(...)` middleware      |
+| Session fixation      | `session.regenerate()` on login                      |
+| CSRF protection       | Token in session, validated on mutating methods      |
+| Rate limiting         | In-memory store, configurable window/max             |
+| File upload security  | Magic bytes validation + MIME type check             |
+| HTTP security headers | Helmet with custom CSP                               |
+| XSS prevention        | EJS auto-escapes output (`<%= %>`)                   |
+| SQL injection         | N/A (Mongoose + prepared statements)                 |
+| Role-based access     | `requireAuth` + `requireRole(...)` middleware        |
 
 ### Content Security Policy (CSP)
 
 The CSP allows:
+
 - `'self'` for all content
 - `cdn.tailwindcss.com` (Tailwind CDN)
 - `cdn.jsdelivr.net` (Bootstrap Icons)
@@ -779,6 +806,7 @@ The CSP allows:
 Submit a comment on a post.
 
 **Request body (JSON):**
+
 ```json
 {
   "postId": "60f7...",
@@ -790,6 +818,7 @@ Submit a comment on a post.
 ```
 
 **Response (AJAX):**
+
 ```json
 {
   "message": "Comment submitted for moderation.",
@@ -806,6 +835,7 @@ Submit a comment on a post.
 Health check endpoint (no auth required).
 
 **Response:**
+
 ```json
 {
   "status": "ok",

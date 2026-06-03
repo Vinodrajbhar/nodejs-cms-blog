@@ -35,7 +35,7 @@ A full-featured blog CMS built with **Express.js 5**, **MongoDB**, and **EJS** â
 
 ```bash
 # 1. Clone the repository
-git clone <repo-url> && cd nodejs-expressjs
+git clone https://github.com/Vinodrajbhar/nodejs-cms-blog.git && cd nodejs-cms-blog
 
 # 2. Install dependencies
 npm install
@@ -91,8 +91,8 @@ docker run -d -p 27017:27017 --name mongo mongo:7
 ### 3. Clone the Project
 
 ```bash
-git clone <repository-url>
-cd nodejs-expressjs
+git clone https://github.com/Vinodrajbhar/nodejs-cms-blog.git
+cd nodejs-cms-blog
 ```
 
 ### 4. Install Dependencies
