@@ -1,0 +1,169 @@
+    </main>
+    </div>
+
+    <!-- Media Selection Modal (hidden by default) -->
+    <div id="mediaModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+      <div class="absolute inset-0 bg-black/60" onclick="closeMediaModal()"></div>
+      <div class="relative mx-auto mt-10 max-w-4xl bg-white rounded-xl shadow-2xl max-h-[85vh] flex flex-col">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-bold text-gray-900">Select Media</h3>
+          <button onclick="closeMediaModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-6">
+          <div id="mediaModalGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div class="col-span-full text-center py-12 text-gray-400">
+              <i class="bi bi-hourglass-split text-3xl block mb-2"></i>
+              Loading media...
+            </div>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50 rounded-b-xl">
+          <div class="flex items-center gap-3">
+            <span id="mediaModalSelected" class="text-sm text-gray-500">No file selected</span>
+            <img id="mediaModalPreview" class="hidden w-12 h-12 object-cover rounded border border-gray-300" alt="Preview">
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="closeMediaModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 text-sm">Cancel</button>
+            <button id="mediaModalSelectBtn" disabled onclick="confirmMediaSelection()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium">Select</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ─── Dark Mode Toggle ──────────────────────────────────────────────
+      function toggleDarkMode() {
+        var html = document.documentElement;
+        html.classList.toggle('dark');
+        localStorage.setItem('adminDarkMode', html.classList.contains('dark'));
+        var label = document.getElementById('darkModeLabel');
+        if (label) label.textContent = html.classList.contains('dark') ? 'Light Mode' : 'Dark Mode';
+      }
+      // Initialize dark mode label
+      (function() {
+        var label = document.getElementById('darkModeLabel');
+        if (label) label.textContent = document.documentElement.classList.contains('dark') ? 'Light Mode' : 'Dark Mode';
+      })();
+
+      // ─── Global confirm delete with SweetAlert2 ────────────────────────
+      function confirmDelete(event, message) {
+        event.preventDefault();
+        var form = event.currentTarget;
+        Swal.fire({
+          title: 'Are you sure?',
+          text: message || 'This action cannot be undone.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#dc2626',
+          cancelButtonColor: '#6b7280',
+          confirmButtonText: 'Yes, delete it',
+          cancelButtonText: 'Cancel',
+          reverseButtons: true
+        }).then(function(result) {
+          if (result.isConfirmed) {
+            form.submit();
+          }
+        });
+      }
+
+      // ─── Sidebar Toggle ─────────────────────────────────────────────────
+      (function() {
+        var sidebar = document.getElementById('adminSidebar');
+        var toggleBtn = document.getElementById('sidebarToggle');
+        if (sidebar && toggleBtn) {
+          // Restore state
+          var collapsed = localStorage.getItem('adminSidebarCollapsed') === 'true';
+          if (collapsed) sidebar.classList.add('collapsed');
+
+          toggleBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem('adminSidebarCollapsed', sidebar.classList.contains('collapsed'));
+          });
+        }
+      })();
+
+      // ─── Keyboard Shortcuts ────────────────────────────────────────────
+      document.addEventListener('keydown', function(e) {
+        // Ctrl+S or Cmd+S to save the active form
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+          var form = document.querySelector('form');
+          if (form && form.querySelector('button[type="submit"]')) {
+            e.preventDefault();
+            form.querySelector('button[type="submit"]').click();
+          }
+        }
+      });
+
+      // ─── Media Modal ───────────────────────────────────────────────────
+      var mediaModalCallback = null;
+
+      function openMediaModal(callback) {
+        mediaModalCallback = callback;
+        var modal = document.getElementById('mediaModal');
+        modal.classList.remove('hidden');
+        document.getElementById('mediaModalSelected').textContent = 'No file selected';
+        document.getElementById('mediaModalPreview').classList.add('hidden');
+        document.getElementById('mediaModalSelectBtn').disabled = true;
+        loadMediaGrid();
+      }
+
+      function closeMediaModal() {
+        document.getElementById('mediaModal').classList.add('hidden');
+        mediaModalCallback = null;
+      }
+
+      function loadMediaGrid() {
+        var grid = document.getElementById('mediaModalGrid');
+        grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-400"><i class="bi bi-hourglass-split text-3xl block mb-2"></i>Loading media...</div>';
+
+        fetch('/admin/api/media')
+          .then(function(r) {
+            return r.json();
+          })
+          .then(function(data) {
+            if (!data.length) {
+              grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-400"><i class="bi bi-images text-3xl block mb-2"></i><p>No media found.</p><a href="/admin/media" class="text-blue-600 hover:underline text-sm">Upload media</a></div>';
+              return;
+            }
+            var html = '';
+            data.forEach(function(item) {
+              html += '<div class="media-modal-item bg-white rounded-lg border border-gray-200 overflow-hidden cursor-pointer hover:ring-2 hover:ring-blue-500 transition" data-path="' + item.path + '" onclick="selectMediaItem(this, \'' + item.path.replace(/'/g, "\\'") + '\')">';
+              html += '<div class="aspect-square bg-gray-50 flex items-center justify-center overflow-hidden">';
+              html += '<img src="' + item.path + '" alt="' + item.originalName.replace(/"/g, '&quot;') + '" class="w-full h-full object-cover">';
+              html += '</div>';
+              html += '<div class="p-2">';
+              html += '<p class="text-xs font-medium text-gray-900 truncate">' + item.originalName.replace(/</g, '&lt;') + '</p>';
+              html += '</div>';
+              html += '</div>';
+            });
+            grid.innerHTML = html;
+          })
+          .catch(function() {
+            grid.innerHTML = '<div class="col-span-full text-center py-12 text-red-400"><i class="bi bi-exclamation-circle text-3xl block mb-2"></i><p>Failed to load media.</p></div>';
+          });
+      }
+
+      function selectMediaItem(el, path) {
+        document.querySelectorAll('.media-modal-item').forEach(function(item) {
+          item.classList.remove('ring-2', 'ring-blue-500');
+        });
+        el.classList.add('ring-2', 'ring-blue-500');
+        document.getElementById('mediaModalSelected').textContent = path;
+        var preview = document.getElementById('mediaModalPreview');
+        preview.src = path;
+        preview.classList.remove('hidden');
+        document.getElementById('mediaModalSelectBtn').disabled = false;
+      }
+
+      function confirmMediaSelection() {
+        var selected = document.querySelector('.media-modal-item.ring-2');
+        if (selected && mediaModalCallback) {
+          var url = window.location.origin + selected.dataset.path;
+          mediaModalCallback(url, selected.dataset.path);
+        }
+        closeMediaModal();
+      }
+    </script>
+    </body>
+
+    </html>

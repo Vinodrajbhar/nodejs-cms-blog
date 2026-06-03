@@ -1,0 +1,80 @@
+<%- include('../../layouts/admin_header') %>
+
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Pages</h1>
+    <p class="text-sm text-gray-500 mt-1"><%= total %> page<%= total !== 1 ? 's' : '' %> total</p>
+  </div>
+  <a href="/admin/pages/new" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+    <i class="bi bi-plus-lg"></i> New Page
+  </a>
+</div>
+
+<form method="GET" action="/admin/pages" class="flex flex-wrap items-center gap-3 mb-6">
+  <select name="status" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+    <option value="">All statuses</option>
+    <option value="draft" <%= typeof filterStatus !== 'undefined' && filterStatus === 'draft' ? 'selected' : '' %>>Drafts</option>
+    <option value="published" <%= typeof filterStatus !== 'undefined' && filterStatus === 'published' ? 'selected' : '' %>>Published</option>
+  </select>
+  <button type="submit" class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">Filter</button>
+  <% if (filterStatus) { %><a href="/admin/pages" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700">Clear</a><% } %>
+</form>
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="bg-gray-50 border-b border-gray-200">
+        <th class="text-left px-4 py-3 font-medium text-gray-600">Title</th>
+        <th class="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Slug</th>
+        <th class="text-left px-4 py-3 font-medium text-gray-600">Status</th>
+        <th class="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Date</th>
+        <th class="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (pages && pages.length) { %>
+      <% pages.forEach(function(p) { %>
+      <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
+        <td class="px-4 py-3">
+          <a href="/admin/pages/<%= p._id %>/edit" class="font-medium text-gray-900 hover:text-blue-600 transition"><%= p.title %></a>
+        </td>
+        <td class="px-4 py-3 text-gray-400 text-xs hidden md:table-cell"><%= p.slug %></td>
+        <td class="px-4 py-3">
+          <span class="px-2 py-0.5 text-xs font-medium rounded <%= p.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' %>"><%= p.status %></span>
+        </td>
+        <td class="px-4 py-3 text-gray-500 text-xs hidden sm:table-cell"><%= new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
+        <td class="px-4 py-3 text-right">
+          <div class="flex items-center justify-end gap-1">
+            <a href="/admin/pages/<%= p._id %>/edit" class="p-1.5 text-gray-400 hover:text-blue-600 transition" title="Edit"><i class="bi bi-pencil"></i></a>
+            <form action="/admin/pages/<%= p._id %>/delete" method="POST" onsubmit="confirmDelete(event, 'Delete this page?')" class="inline">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 transition" title="Delete"><i class="bi bi-trash"></i></button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      <% }); %>
+      <% } else { %>
+      <tr>
+        <td colspan="5" class="text-center py-12 text-gray-400">
+          <i class="bi bi-files text-3xl block mb-2"></i>
+          <p>No pages yet</p>
+          <a href="/admin/pages/new" class="text-blue-600 hover:underline text-sm mt-1 inline-block">Create your first page</a>
+        </td>
+      </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+<div class="flex items-center justify-center gap-2 mt-6">
+  <% if (currentPage > 1) { %><a href="?page=<%= currentPage - 1 %><%= filterStatus ? '&status=' + filterStatus : '' %>" class="px-3 py-1.5 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50 transition">&larr;</a><% } %>
+  <% for (let i = 1; i <= totalPages; i++) { %>
+  <a href="?page=<%= i %><%= filterStatus ? '&status=' + filterStatus : '' %>" class="px-3 py-1.5 border rounded text-sm <%= i === currentPage ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50' %>"><%= i %></a>
+  <% } %>
+  <% if (currentPage < totalPages) { %><a href="?page=<%= currentPage + 1 %><%= filterStatus ? '&status=' + filterStatus : '' %>" class="px-3 py-1.5 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50 transition">&rarr;</a><% } %>
+</div>
+<% } %>
+
+<%- include('../../layouts/admin_footer') %>

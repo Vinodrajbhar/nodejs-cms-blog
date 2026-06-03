@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title ? title + ' | ' : '' %>Admin - Blog CMS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    .sidebar-link {
+      transition: all 0.2s;
+    }
+
+    .sidebar-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-link.active {
+      background: rgba(255, 255, 255, 0.15);
+      border-left: 3px solid #3b82f6;
+    }
+
+    .sidebar-wrap {
+      transition: width 0.25s ease;
+      overflow: hidden;
+    }
+
+    .sidebar-wrap.collapsed {
+      width: 64px !important;
+    }
+
+    .sidebar-wrap.collapsed .sidebar-label {
+      display: none;
+    }
+
+    .sidebar-wrap.collapsed .sidebar-brand-text {
+      display: none;
+    }
+
+    .sidebar-wrap.collapsed nav a {
+      justify-content: center;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    .sidebar-wrap.collapsed hr {
+      margin-left: 0.75rem;
+      margin-right: 0.75rem;
+    }
+
+    .sidebar-toggle-btn {
+      cursor: pointer;
+      transition: transform 0.25s ease;
+    }
+
+    .sidebar-wrap.collapsed .sidebar-toggle-btn {
+      transform: rotate(180deg);
+    }
+
+    .sidebar-wrap.collapsed nav a {
+      position: relative;
+    }
+
+    .sidebar-wrap.collapsed nav a:hover::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 100%;
+      margin-left: 10px;
+      background: #1f2937;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      white-space: nowrap;
+      z-index: 50;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex">
+  <!-- Sidebar -->
+  <aside id="adminSidebar" class="sidebar-wrap w-64 bg-gray-900 text-white flex-shrink-0 min-h-screen">
+    <div class="p-4 border-b border-gray-700 flex items-center gap-2">
+      <i class="bi bi-shield-check text-xl"></i>
+      <h1 class="sidebar-brand-text text-xl font-bold flex-1">BlogCMS</h1>
+    </div>
+    <nav class="p-2 space-y-1">
+      <a href="/admin" data-label="Dashboard" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= path === '/admin' ? 'active' : '' %>">
+        <i class="bi bi-speedometer2 text-lg"></i> <span class="sidebar-label">Dashboard</span>
+      </a>
+      <a href="/admin/posts" data-label="Posts" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= path && path.startsWith('/admin/posts') ? 'active' : '' %>">
+        <i class="bi bi-file-text text-lg"></i> <span class="sidebar-label">Posts</span>
+      </a>
+      <a href="/admin/pages" data-label="Pages" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= path && path.startsWith('/admin/pages') ? 'active' : '' %>">
+        <i class="bi bi-files text-lg"></i> <span class="sidebar-label">Pages</span>
+      </a>
+      <a href="/admin/categories" data-label="Categories" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= path && path.startsWith('/admin/categories') ? 'active' : '' %>">
+        <i class="bi bi-tags text-lg"></i> <span class="sidebar-label">Categories</span>
+      </a>
+      <a href="/admin/tags" data-label="Tags" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= path && path.startsWith('/admin/tags') ? 'active' : '' %>">
+        <i class="bi bi-bookmark text-lg"></i> <span class="sidebar-label">Tags</span>
+      </a>
+      <a href="/admin/comments" data-label="Comments" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= path && path.startsWith('/admin/comments') ? 'active' : '' %>">
+        <i class="bi bi-chat-dots text-lg"></i> <span class="sidebar-label">Comments</span>
+      </a>
+      <a href="/admin/media" data-label="Media" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= path && path.startsWith('/admin/media') ? 'active' : '' %>">
+        <i class="bi bi-images text-lg"></i> <span class="sidebar-label">Media</span>
+      </a>
+      <hr class="border-gray-700 my-2">
+      <a href="/admin/users" data-label="Users" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= path && path.startsWith('/admin/users') ? 'active' : '' %>">
+        <i class="bi bi-people text-lg"></i> <span class="sidebar-label">Users</span>
+      </a>
+      <a href="/admin/themes" data-label="Themes" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= path && path.startsWith('/admin/themes') ? 'active' : '' %>">
+        <i class="bi bi-palette text-lg"></i> <span class="sidebar-label">Themes</span>
+      </a>
+      <a href="/admin/settings" data-label="Settings" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= path && path.startsWith('/admin/settings') ? 'active' : '' %>">
+        <i class="bi bi-gear text-lg"></i> <span class="sidebar-label">Settings</span>
+      </a>
+      <hr class="border-gray-700 my-2">
+      <a href="/" target="_blank" data-label="View Site" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded">
+        <i class="bi bi-box-arrow-up-right text-lg"></i> <span class="sidebar-label">View Site</span>
+      </a>
+      <a href="/admin/logout" data-label="Logout" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-red-400 hover:text-red-300">
+        <i class="bi bi-box-arrow-left text-lg"></i> <span class="sidebar-label">Logout</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <!-- Top Bar -->
+    <header class="bg-white shadow-sm border-b px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button id="sidebarToggle" class="sidebar-toggle-btn text-gray-500 hover:text-gray-700 transition text-xl" title="Toggle sidebar">
+          <i class="bi bi-layout-sidebar"></i>
+        </button>
+        <h2 class="text-lg font-semibold text-gray-700"><%= title || 'Dashboard' %></h2>
+      </div>
+      <div class="flex items-center gap-3 text-sm text-gray-600">
+        <i class="bi bi-person-circle text-xl"></i>
+        <span><%= currentUser ? currentUser.username : 'Guest' %></span>
+        <span class="px-2 py-0.5 bg-gray-200 rounded text-xs capitalize"><%= currentUser ? currentUser.role : '' %></span>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="flex-1 p-6 overflow-y-auto">
+      <%- body %>
+    </main>
+  </div>
+
+  <!-- Media Modal -->
+  <div id="mediaModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+    <div class="absolute inset-0 bg-black/60" onclick="closeMediaModal()"></div>
+    <div class="relative mx-auto mt-10 max-w-4xl bg-white rounded-xl shadow-2xl max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold text-gray-900">Select Media</h3>
+        <button onclick="closeMediaModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-6">
+        <div id="mediaModalGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div class="col-span-full text-center py-12 text-gray-400">
+            <i class="bi bi-hourglass-split text-3xl block mb-2"></i>Loading media...
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50 rounded-b-xl">
+        <div class="flex items-center gap-3">
+          <span id="mediaModalSelected" class="text-sm text-gray-500">No file selected</span>
+          <img id="mediaModalPreview" class="hidden w-12 h-12 object-cover rounded border border-gray-300" alt="Preview">
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="closeMediaModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 text-sm">Cancel</button>
+          <button id="mediaModalSelectBtn" disabled onclick="confirmMediaSelection()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium">Select</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var sidebar = document.getElementById('adminSidebar');
+      var toggleBtn = document.getElementById('sidebarToggle');
+      if (sidebar && toggleBtn) {
+        var collapsed = localStorage.getItem('adminSidebarCollapsed') === 'true';
+        if (collapsed) sidebar.classList.add('collapsed');
+        toggleBtn.addEventListener('click', function() {
+          sidebar.classList.toggle('collapsed');
+          localStorage.setItem('adminSidebarCollapsed', sidebar.classList.contains('collapsed'));
+        });
+      }
+    })();
+
+    var mediaModalCallback = null;
+
+    function openMediaModal(callback) {
+      mediaModalCallback = callback;
+      var modal = document.getElementById('mediaModal');
+      modal.classList.remove('hidden');
+      document.getElementById('mediaModalSelected').textContent = 'No file selected';
+      document.getElementById('mediaModalPreview').classList.add('hidden');
+      document.getElementById('mediaModalSelectBtn').disabled = true;
+      loadMediaGrid();
+    }
+
+    function closeMediaModal() {
+      document.getElementById('mediaModal').classList.add('hidden');
+      mediaModalCallback = null;
+    }
+
+    function loadMediaGrid() {
+      var grid = document.getElementById('mediaModalGrid');
+      grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-400"><i class="bi bi-hourglass-split text-3xl block mb-2"></i>Loading media...</div>';
+      fetch('/admin/api/media').then(function(r) {
+        return r.json();
+      }).then(function(data) {
+        if (!data.length) {
+          grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-400"><i class="bi bi-images text-3xl block mb-2"></i><p>No media found.</p><a href="/admin/media" class="text-blue-600 hover:underline text-sm">Upload media</a></div>';
+          return;
+        }
+        var html = '';
+        data.forEach(function(item) {
+          html += '<div class="media-modal-item bg-white rounded-lg border border-gray-200 overflow-hidden cursor-pointer hover:ring-2 hover:ring-blue-500 transition" data-path="' + item.path + '" onclick="selectMediaItem(this, \'' + item.path.replace(/'/g, "\\'") + '\')">';
+          html += '<div class="aspect-square bg-gray-50 flex items-center justify-center overflow-hidden">';
+          html += '<img src="' + item.path + '" alt="' + item.originalName.replace(/"/g, '&quot;') + '" class="w-full h-full object-cover">';
+          html += '</div>';
+          html += '<div class="p-2">';
+          html += '<p class="text-xs font-medium text-gray-900 truncate">' + item.originalName.replace(/</g, '&lt;') + '</p>';
+          html += '</div></div>';
+        });
+        grid.innerHTML = html;
+      }).catch(function() {
+        grid.innerHTML = '<div class="col-span-full text-center py-12 text-red-400"><i class="bi bi-exclamation-circle text-3xl block mb-2"></i><p>Failed to load media.</p></div>';
+      });
+    }
+
+    function selectMediaItem(el, path) {
+      document.querySelectorAll('.media-modal-item').forEach(function(item) {
+        item.classList.remove('ring-2', 'ring-blue-500');
+      });
+      el.classList.add('ring-2', 'ring-blue-500');
+      document.getElementById('mediaModalSelected').textContent = path;
+      var preview = document.getElementById('mediaModalPreview');
+      preview.src = path;
+      preview.classList.remove('hidden');
+      document.getElementById('mediaModalSelectBtn').disabled = false;
+    }
+
+    function confirmMediaSelection() {
+      var selected = document.querySelector('.media-modal-item.ring-2');
+      if (selected && mediaModalCallback) {
+        var url = window.location.origin + selected.dataset.path;
+        mediaModalCallback(url, selected.dataset.path);
+      }
+      closeMediaModal();
+    }
+  </script>
+</body>
+
+</html>

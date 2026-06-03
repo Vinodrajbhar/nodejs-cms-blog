@@ -1,0 +1,228 @@
+<%- include('../../layouts/admin_header') %>
+
+<style>
+  .ql-editor {
+    min-height: 350px;
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+
+  .ql-editor.ql-blank::before {
+    color: #9ca3af;
+    font-style: normal;
+  }
+
+  .ql-toolbar {
+    border-radius: 0.5rem 0.5rem 0 0;
+    border-color: #d1d5db !important;
+  }
+
+  .ql-container {
+    border-radius: 0 0 0.5rem 0.5rem;
+    border-color: #d1d5db !important;
+  }
+</style>
+
+<div class="max-w-4xl">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900"><%= page ? 'Edit Page' : 'New Page' %></h1>
+      <a href="/admin/pages" class="text-sm text-gray-500 hover:text-blue-600 transition">&larr; Back to Pages</a>
+    </div>
+  </div>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+  <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 flex items-center gap-2 text-sm">
+    <i class="bi bi-exclamation-circle"></i> <%= error %>
+  </div>
+  <% } %>
+
+  <form action="/admin/pages<%= page ? '/' + page._id + '/edit' : '' %>" method="POST" class="space-y-6">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div>
+      <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+      <input type="text" id="title" name="title" value="<%= page ? page.title : '' %>" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-lg font-medium" placeholder="Enter page title">
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Content</label>
+      <div id="editor-container" class="bg-white"><%- page ? page.content : '' %></div>
+      <input type="hidden" name="content" id="content-input">
+    </div>
+
+    <div>
+      <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+      <select id="status" name="status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm max-w-xs">
+        <option value="draft" <%= page && page.status === 'draft' ? 'selected' : '' %>>Draft</option>
+        <option value="published" <%= page && page.status === 'published' ? 'selected' : '' %>>Published</option>
+      </select>
+    </div>
+
+    <!-- Featured Image -->
+    <div>
+      <label for="featuredImage" class="block text-sm font-medium text-gray-700 mb-1">Featured Image</label>
+      <div class="flex gap-2">
+        <input type="text" id="featuredImage" name="featuredImage" value="<%= page ? page.featuredImage || '' : '' %>" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Image URL or select from media library">
+        <button type="button" onclick="openMediaModal(function(url, path) { document.getElementById('featuredImage').value = path; showFeaturedPreview(path); })" class="px-3 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm border border-gray-300 whitespace-nowrap">
+          <i class="bi bi-images"></i> Browse
+        </button>
+      </div>
+      <div id="featuredPreviewWrap" class="mt-2 <%= page && page.featuredImage ? '' : 'hidden' %>">
+        <img id="featuredPreview" src="<%= page ? page.featuredImage || '' : '' %>" class="max-h-32 rounded-lg border border-gray-200 object-cover" alt="Featured preview">
+        <button type="button" onclick="document.getElementById('featuredImage').value='';document.getElementById('featuredPreviewWrap').classList.add('hidden');" class="text-xs text-red-500 hover:text-red-700 mt-1 flex items-center gap-1">
+          <i class="bi bi-x-circle"></i> Remove
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── SEO Settings (collapsible) ─── -->
+    <details class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+      <summary class="px-5 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100 transition flex items-center gap-2 text-sm font-semibold text-gray-700">
+        <i class="bi bi-search-heart"></i> SEO Settings
+        <span class="ml-auto text-xs text-gray-400 font-normal"><i class="bi bi-chevron-down"></i></span>
+      </summary>
+      <div class="px-5 py-4 space-y-4 border-t border-gray-200">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="seoTitle" class="block text-sm font-medium text-gray-700 mb-1">SEO Title</label>
+            <input type="text" id="seoTitle" name="seoTitle" value="<%= page ? page.seoTitle || '' : '' %>" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Custom title for search results">
+            <p class="text-xs text-gray-400 mt-1">Leave blank to use the page title.
+              <span id="seoTitleCount" class="text-gray-500">0</span>
+            </p>
+          </div>
+          <div>
+            <label for="breadcrumbTitle" class="block text-sm font-medium text-gray-700 mb-1">Breadcrumb Title</label>
+            <input type="text" id="breadcrumbTitle" name="breadcrumbTitle" value="<%= page ? page.breadcrumbTitle || '' : '' %>" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Shorter title for breadcrumbs">
+          </div>
+        </div>
+        <div>
+          <label for="metaDescription" class="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
+          <textarea id="metaDescription" name="metaDescription" rows="2" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-y" placeholder="Brief description for search snippets"><%= page ? page.metaDescription || '' : '' %></textarea>
+          <p class="text-xs text-gray-400 mt-1">Recommended: 120-160 characters.
+            <span id="metaDescCount" class="text-gray-500">0</span>
+          </p>
+        </div>
+        <div>
+          <label for="focusKeyphrase" class="block text-sm font-medium text-gray-700 mb-1">Focus Keyphrase</label>
+          <input type="text" id="focusKeyphrase" name="focusKeyphrase" value="<%= page ? page.focusKeyphrase || '' : '' %>" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="e.g. about our company">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Open Graph (Social Sharing)</label>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input type="text" id="ogTitle" name="ogTitle" value="<%= page ? page.ogTitle || '' : '' %>" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="OG Title">
+            <input type="text" id="ogDescription" name="ogDescription" value="<%= page ? page.ogDescription || '' : '' %>" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="OG Description">
+            <div class="flex gap-2">
+              <input type="text" id="ogImage" name="ogImage" value="<%= page ? page.ogImage || '' : '' %>" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="OG Image URL">
+              <button type="button" onclick="openMediaModal(function(url, path) { document.getElementById('ogImage').value = path; })" class="px-3 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm border border-gray-300 whitespace-nowrap">
+                <i class="bi bi-images"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="canonicalUrl" class="block text-sm font-medium text-gray-700 mb-1">Canonical URL</label>
+            <input type="url" id="canonicalUrl" name="canonicalUrl" value="<%= page ? page.canonicalUrl || '' : '' %>" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="https://example.com/original-page">
+          </div>
+          <div class="flex items-center pt-6">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="hidden" name="noindex" value="false">
+              <input type="checkbox" name="noindex" value="true" <%= page && page.noindex ? 'checked' : '' %> class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+              <span class="text-sm text-gray-700">Hide from search engines (noindex)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div class="flex items-center gap-3 pt-4 border-t border-gray-200">
+      <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm">
+        <%= page ? 'Update Page' : 'Create Page' %>
+      </button>
+      <a href="/admin/pages" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-medium">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script>
+  (function() {
+    var editor = new Quill('#editor-container', {
+      theme: 'snow',
+      modules: {
+        toolbar: [
+          [{
+            header: [1, 2, 3, false]
+          }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{
+            list: 'ordered'
+          }, {
+            list: 'bullet'
+          }],
+          ['blockquote', 'code-block'],
+          [{
+            align: []
+          }],
+          ['link', 'image'],
+          ['clean'],
+        ],
+      },
+      placeholder: 'Start writing your page content...',
+    });
+
+    // Custom image button handler — open media modal instead of default URL prompt
+    var toolbar = editor.getModule('toolbar');
+    toolbar.addHandler('image', function() {
+      openMediaModal(function(url) {
+        var range = editor.getSelection(true);
+        editor.insertEmbed(range.index, 'image', url);
+        editor.setSelection(range.index + 1);
+      });
+    });
+
+    document.querySelector('form').addEventListener('submit', function() {
+      document.getElementById('content-input').value = editor.root.innerHTML;
+    });
+  })();
+
+  function showFeaturedPreview(path) {
+    var wrap = document.getElementById('featuredPreviewWrap');
+    var img = document.getElementById('featuredPreview');
+    if (wrap && img) {
+      img.src = path;
+      wrap.classList.remove('hidden');
+    }
+  }
+
+  // ─── SEO character counters ───
+  (function() {
+    var seoTitle = document.getElementById('seoTitle');
+    var metaDesc = document.getElementById('metaDescription');
+    var titleCount = document.getElementById('seoTitleCount');
+    var descCount = document.getElementById('metaDescCount');
+
+    if (seoTitle && titleCount) {
+      function updateTitleCount() {
+        var len = seoTitle.value.length;
+        titleCount.textContent = len;
+        titleCount.className = len > 60 ? 'text-red-500' : len > 50 ? 'text-yellow-500' : 'text-gray-500';
+      }
+      seoTitle.addEventListener('input', updateTitleCount);
+      updateTitleCount();
+    }
+
+    if (metaDesc && descCount) {
+      function updateDescCount() {
+        var len = metaDesc.value.length;
+        descCount.textContent = len;
+        descCount.className = len > 160 ? 'text-red-500' : len > 120 ? 'text-yellow-500' : 'text-gray-500';
+      }
+      metaDesc.addEventListener('input', updateDescCount);
+      updateDescCount();
+    }
+  })();
+</script>
+
+<%- include('../../layouts/admin_footer') %>

@@ -1,0 +1,94 @@
+<%- include('../../../src/views/layouts/public_header') %>
+
+<!-- Ocean Blue Theme - Custom Homepage Hero -->
+<section class="bg-gradient-to-br from-blue-600 to-blue-900 text-white border-b border-blue-400">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+    <div class="max-w-3xl">
+      <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+        <%= typeof currentCategory !== 'undefined' && currentCategory ? currentCategory.name : (typeof currentTag !== 'undefined' && currentTag ? 'Posts tagged: ' + currentTag.name : 'Welcome to the Blog') %>
+      </h1>
+      <p class="mt-4 text-lg text-blue-100">
+        <% if (typeof currentCategory !== 'undefined' && currentCategory && currentCategory.description) { %>
+        <%= currentCategory.description %>
+        <% } else if (typeof currentTag !== 'undefined' && currentTag) { %>
+        Browse all posts tagged with <strong><%= currentTag.name %></strong>
+        <% } else { %>
+        This site is proudly powered by the <strong class="text-white">Ocean Blue</strong> theme.
+        <% } %>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Posts Grid -->
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="flex flex-col lg:flex-row gap-12">
+    <!-- Main -->
+    <div class="flex-1 min-w-0">
+      <% if (typeof posts !== 'undefined' && posts.length) { %>
+      <div class="space-y-8">
+        <% posts.forEach(function(post) { %>
+        <article class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
+          <% if (post.featuredImage) { %>
+          <img src="<%= post.featuredImage %>" alt="<%= post.title %>" class="w-full h-48 object-cover">
+          <% } %>
+          <div class="p-6">
+            <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500 mb-3">
+              <% if (post.categories && post.categories.length) { %>
+              <% post.categories.forEach(function(cat) { %>
+              <a href="/category/<%= cat.slug %>" class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition font-medium"><%= cat.name %></a>
+              <% }); %>
+              <% } %>
+              <% if (post.publishedAt) { %>
+              <span><%= new Date(post.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+              <% } %>
+            </div>
+            <h2 class="text-xl font-bold text-gray-900 mb-2">
+              <a href="/post/<%= post.slug %>" class="hover:text-blue-600 transition"><%= post.title %></a>
+            </h2>
+            <p class="text-gray-600 text-sm leading-relaxed mb-4"><%= (post.excerpt || post.content || '').replace(/<[^>]*>/g, '').substring(0, 200) + (post.excerpt || post.content ? '...' : '') %></p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 text-sm text-gray-500">
+                <% if (post.author) { %>
+                <i class="bi bi-person-circle"></i>
+                <span><%= post.author.username %></span>
+                <% } %>
+              </div>
+              <a href="/post/<%= post.slug %>" class="text-blue-600 hover:text-blue-700 text-sm font-medium inline-flex items-center gap-1">
+                Read More <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+        <% }); %>
+      </div>
+
+      <!-- Pagination -->
+      <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+      <div class="flex items-center justify-center gap-2 mt-10">
+        <% if (currentPage > 1) { %>
+        <a href="/?page=<%= currentPage - 1 %>" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm transition">&laquo; Previous</a>
+        <% } %>
+        <% for (var p = 1; p <= totalPages; p++) { %>
+        <a href="/?page=<%= p %>" class="px-3 py-2 border rounded-lg text-sm transition <%= p === currentPage ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 hover:bg-gray-50' %>"><%= p %></a>
+        <% } %>
+        <% if (currentPage < totalPages) { %>
+        <a href="/?page=<%= currentPage + 1 %>" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm transition">Next &raquo;</a>
+        <% } %>
+      </div>
+      <% } %>
+      <% } else { %>
+      <div class="text-center py-16">
+        <div class="text-5xl text-gray-200 mb-4"><i class="bi bi-file-text"></i></div>
+        <h2 class="text-xl font-semibold text-gray-700">No posts yet</h2>
+        <p class="text-gray-400 mt-2">Check back soon for new content!</p>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- Sidebar -->
+    <%- include('../../../src/views/public/partials/sidebar') %>
+  </div>
+</div>
+
+<%- include('../../../src/views/layouts/public_footer') %>

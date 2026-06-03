@@ -1,0 +1,33 @@
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-50 border-t border-gray-100 mt-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="text-sm text-gray-500">
+          &copy; <%= new Date().getFullYear() %> <%= typeof siteName !== 'undefined' ? siteName : 'My Blog' %>. All rights reserved.
+        </p>
+        <div class="flex items-center gap-4 text-sm text-gray-500">
+          <a href="/" class="hover:text-blue-600 transition">Home</a>
+          <% if (typeof navItems !== 'undefined' && navItems && navItems.length) { %>
+          <% navItems.forEach(function(item) { %>
+          <a href="<%= item.url %>" class="hover:text-blue-600 transition"><%= item.label %></a>
+          <% }); %>
+          <% } %>
+          <% if (typeof navAutoPages !== 'undefined' && navAutoPages && typeof pages !== 'undefined' && pages && pages.length) { %>
+          <% pages.forEach(function(page) { %>
+          <a href="/page/<%= page.slug %>" class="hover:text-blue-600 transition"><%= page.title %></a>
+          <% }); %>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Theme Custom JS -->
+  <% if (typeof themeAssets !== 'undefined' && themeAssets && themeAssets.hasJs) { %>
+  <script src="/assets/theme/js/theme.js"></script>
+  <% } %>
+  </body>
+
+  </html>

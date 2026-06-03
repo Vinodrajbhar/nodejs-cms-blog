@@ -1,0 +1,87 @@
+<%- include('../layouts/public_header') %>
+
+<!-- Hero Section -->
+<section class="bg-gradient-to-br from-gray-50 to-white border-b border-gray-100">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+    <div class="max-w-2xl">
+      <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">
+        <%= typeof currentCategory !== 'undefined' && currentCategory ? currentCategory.name : (typeof currentTag !== 'undefined' && currentTag ? 'Posts tagged: ' + currentTag.name : 'Welcome to the Blog') %>
+      </h1>
+      <p class="mt-4 text-lg text-gray-600">
+        <%= typeof currentCategory !== 'undefined' && currentCategory ? (currentCategory.description || 'Browse all posts in this category.') : (typeof currentTag !== 'undefined' && currentTag ? 'Browse all posts with this tag.' : 'Discover articles, tutorials, and insights.') %>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Blog Posts Grid -->
+<section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="flex flex-col lg:flex-row gap-12">
+    <div class="flex-1 min-w-0">
+      <% if (typeof posts !== 'undefined' && posts && posts.length) { %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <% posts.forEach(function(post) { %>
+        <article class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col">
+          <% if (post.featuredImage) { %>
+          <a href="<%= postUrl(post) %>" class="block overflow-hidden">
+            <img src="<%= post.featuredImage %>" alt="<%= post.title %>" class="w-full h-48 object-cover hover:scale-105 transition duration-300">
+          </a>
+          <% } else { %>
+          <a href="<%= postUrl(post) %>" class="block h-48 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+            <i class="bi bi-file-text text-blue-300 text-4xl"></i>
+          </a>
+          <% } %>
+          <div class="p-5 flex-1 flex flex-col">
+            <div class="flex items-center gap-2 mb-3">
+              <% if (post.categories && post.categories.length) { %>
+              <% post.categories.forEach(function(cat) { %>
+              <a href="<%= categoryUrl(cat) %>" class="text-xs font-medium px-2.5 py-1 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition"><%= cat.name %></a>
+              <% }); %>
+              <% } %>
+            </div>
+            <a href="<%= postUrl(post) %>" class="block">
+              <h2 class="text-lg font-bold text-gray-900 hover:text-blue-600 transition"><%= post.title %></h2>
+            </a>
+            <% if (post.excerpt) { %>
+            <p class="mt-2 text-sm text-gray-500 line-clamp-3 flex-1"><%= post.excerpt.replace(/<[^>]*>/g, '') %></p>
+            <% } else if (post.content) { %>
+            <p class="mt-2 text-sm text-gray-500 line-clamp-3 flex-1"><%= post.content.replace(/<[^>]*>/g, '').substring(0, 200) %></p>
+            <% } %>
+            <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
+              <span><%= new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+              <span><%= post.author ? post.author.username : 'Anonymous' %></span>
+            </div>
+          </div>
+        </article>
+        <% }); %>
+      </div>
+
+      <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+      <div class="flex items-center justify-center gap-2 mt-12">
+        <% if (typeof currentPage !== 'undefined' && currentPage > 1) { %>
+        <a href="?page=<%= currentPage - 1 %>" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">&larr; Previous</a>
+        <% } %>
+        <% for (let i = 1; i <= totalPages; i++) { %>
+        <a href="?page=<%= i %>" class="px-4 py-2 border rounded-lg text-sm transition <%= i === currentPage ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50' %>"><%= i %></a>
+        <% } %>
+        <% if (typeof currentPage !== 'undefined' && currentPage < totalPages) { %>
+        <a href="?page=<%= currentPage + 1 %>" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">Next &rarr;</a>
+        <% } %>
+      </div>
+      <% } %>
+      <% } else { %>
+      <div class="text-center py-20">
+        <i class="bi bi-journal-text text-gray-300 text-5xl block mb-4"></i>
+        <h2 class="text-xl font-semibold text-gray-500">No posts yet</h2>
+        <p class="text-gray-400 mt-2">Check back soon for new articles.</p>
+      </div>
+      <% } %>
+    </div>
+    <!-- Sidebar -->
+    <div class="w-full lg:w-72 flex-shrink-0">
+      <%- include('partials/sidebar') %>
+    </div>
+  </div>
+</section>
+
+<%- include('../layouts/public_footer') %>

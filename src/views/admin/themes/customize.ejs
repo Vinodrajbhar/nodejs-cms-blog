@@ -1,0 +1,68 @@
+<%- include('../../layouts/admin_header') %>
+
+<div class="max-w-4xl">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Customize — <%= typeof theme !== 'undefined' && theme ? theme.name : '' %></h1>
+      <p class="text-sm text-gray-500 mt-1">Edit the CSS and JavaScript for this theme. Changes are saved to the filesystem and database.</p>
+    </div>
+    <a href="/admin/themes" class="px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm flex items-center gap-2">
+      <i class="bi bi-arrow-left"></i> Back to Themes
+    </a>
+  </div>
+
+  <% if (typeof overriddenTemplates !== 'undefined' && overriddenTemplates && overriddenTemplates.length) { %>
+  <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg mb-6 flex items-start gap-3 text-sm">
+    <i class="bi bi-info-circle mt-0.5"></i>
+    <div>
+      <span class="font-medium">Overridden templates:</span>
+      <div class="flex flex-wrap gap-1.5 mt-1">
+        <% overriddenTemplates.forEach(function(tpl) { %>
+        <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-mono"><%= tpl %></span>
+        <% }); %>
+      </div>
+    </div>
+  </div>
+  <% } else { %>
+  <div class="bg-gray-50 border border-gray-200 text-gray-600 px-4 py-3 rounded-lg mb-6 flex items-center gap-2 text-sm">
+    <i class="bi bi-info-circle"></i> No templates overridden yet. Create <code>.ejs</code> files in <code>themes/<%= typeof theme !== 'undefined' && theme ? theme.slug : '' %>/views/public/</code> to override default views.
+  </div>
+  <% } %>
+
+  <form action="/admin/themes/<%= typeof theme !== 'undefined' && theme ? theme._id : '' %>/customize" method="POST" class="space-y-6">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <!-- Custom CSS -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <i class="bi bi-filetype-css text-blue-500"></i> Custom CSS
+        </h2>
+        <span class="text-xs text-gray-400">Loaded in &lt;head&gt; on all public pages</span>
+      </div>
+      <textarea id="customCss" name="customCss" rows="16" spellcheck="false" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono leading-relaxed resize-y" placeholder="/* Add your custom CSS here */"><%= typeof cssContent !== 'undefined' ? cssContent : '' %></textarea>
+    </div>
+
+    <!-- Custom JS -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <i class="bi bi-filetype-js text-yellow-500"></i> Custom JavaScript
+        </h2>
+        <span class="text-xs text-gray-400">Loaded before &lt;/body&gt; on all public pages</span>
+      </div>
+      <textarea id="customJs" name="customJs" rows="10" spellcheck="false" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono leading-relaxed resize-y" placeholder="// Add your custom JavaScript here"><%= typeof jsContent !== 'undefined' ? jsContent : '' %></textarea>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm">
+        <i class="bi bi-check-lg"></i> Save Customization
+      </button>
+      <a href="/admin/themes" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+
+<%- include('../../layouts/admin_footer') %>

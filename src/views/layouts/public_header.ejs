@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Title -->
+  <title><%
+    if (typeof pageSeoTitle !== 'undefined' && pageSeoTitle) {
+      %><%= pageSeoTitle %><%
+    } else if (typeof title !== 'undefined' && title) {
+      %><%= title %><%= typeof titleSeparator !== 'undefined' ? ' ' + titleSeparator + ' ' : ' | ' %><%= typeof siteName !== 'undefined' ? siteName : 'Blog' %><%
+    } else {
+      %><%= typeof siteName !== 'undefined' ? siteName : 'Blog' %><%
+    }
+  %></title>
+
+  <!-- Meta Description -->
+  <meta name="description" content="<%= typeof pageMetaDescription !== 'undefined' ? pageMetaDescription : '' %>">
+
+  <!-- Canonical URL -->
+  <% if (typeof pageCanonical !== 'undefined' && pageCanonical) { %>
+  <link rel="canonical" href="<%= pageCanonical %>">
+  <% } %>
+
+  <!-- Robots -->
+  <% if (typeof pageNoindex !== 'undefined' && pageNoindex) { %>
+  <meta name="robots" content="noindex">
+  <% } %>
+
+  <!-- Open Graph -->
+  <meta property="og:site_name" content="<%= typeof siteName !== 'undefined' ? siteName : 'Blog' %>">
+  <meta property="og:type" content="<%= typeof ogType !== 'undefined' ? ogType : 'website' %>">
+  <% if (typeof pageOgTitle !== 'undefined' && pageOgTitle) { %>
+  <meta property="og:title" content="<%= pageOgTitle %>">
+  <% } %>
+  <% if (typeof pageOgDescription !== 'undefined' && pageOgDescription) { %>
+  <meta property="og:description" content="<%= pageOgDescription %>">
+  <% } %>
+  <% if (typeof pageOgImage !== 'undefined' && pageOgImage) { %>
+  <meta property="og:image" content="<%= pageOgImage %>">
+  <% } %>
+  <% if (typeof pageCanonical !== 'undefined' && pageCanonical) { %>
+  <meta property="og:url" content="<%= pageCanonical %>">
+  <% } %>
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="<%= typeof twitterCardType !== 'undefined' ? twitterCardType : 'summary_large_image' %>">
+  <% if (typeof twitterUsername !== 'undefined' && twitterUsername) { %>
+  <meta name="twitter:site" content="@<%= twitterUsername %>">
+  <% } %>
+  <% if (typeof pageOgTitle !== 'undefined' && pageOgTitle) { %>
+  <meta name="twitter:title" content="<%= pageOgTitle %>">
+  <% } %>
+  <% if (typeof pageOgDescription !== 'undefined' && pageOgDescription) { %>
+  <meta name="twitter:description" content="<%= pageOgDescription %>">
+  <% } %>
+  <% if (typeof pageOgImage !== 'undefined' && pageOgImage) { %>
+  <meta name="twitter:image" content="<%= pageOgImage %>">
+  <% } %>
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "<%= typeof siteName !== 'undefined' ? siteName : 'Blog' %>",
+      "url": "<%= typeof siteUrl !== 'undefined' ? siteUrl : 'http://localhost:3000' %>"
+      <% if (typeof searchUrl !== 'undefined' && searchUrl) { %>,
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "<%= searchUrl %>?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+      <% } %>
+    }
+  </script>
+
+  <% if (typeof pageSchema !== 'undefined' && pageSchema) { %>
+  <%- pageSchema %>
+  <% } %>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .prose {
+      max-width: 65ch;
+      line-height: 1.8;
+    }
+
+    .prose h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .prose h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .prose p {
+      margin-bottom: 1rem;
+    }
+
+    .prose ul,
+    .prose ol {
+      margin-bottom: 1rem;
+      padding-left: 1.5rem;
+    }
+
+    .prose li {
+      margin-bottom: 0.25rem;
+    }
+
+    .prose img {
+      border-radius: 0.5rem;
+      margin: 1.5rem auto;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .prose blockquote {
+      border-left: 4px solid #3b82f6;
+      padding-left: 1rem;
+      font-style: italic;
+      color: #4b5563;
+      margin: 1.5rem 0;
+    }
+
+    .prose a {
+      color: #2563eb;
+      text-decoration: underline;
+    }
+
+    .prose pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin: 1.5rem 0;
+    }
+  </style>
+
+  <!-- Theme Custom CSS -->
+  <% if (typeof themeAssets !== 'undefined' && themeAssets && themeAssets.hasCss) { %>
+  <link rel="stylesheet" href="/assets/theme/css/theme.css">
+  <% } %>
+</head>
+
+<body class="bg-white text-gray-800 antialiased flex flex-col min-h-screen">
+  <!-- Header -->
+  <header class="border-b border-gray-100">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="text-xl font-bold text-gray-900 hover:text-blue-600 transition">
+          <%= typeof siteName !== 'undefined' ? siteName : 'My Blog' %>
+        </a>
+        <nav class="hidden md:flex items-center gap-6">
+          <a href="/" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition">Home</a>
+          <% if (typeof navItems !== 'undefined' && navItems && navItems.length) { %>
+          <% navItems.forEach(function(item) { %>
+          <a href="<%= item.url %>" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition"><%= item.label %></a>
+          <% }); %>
+          <% } %>
+          <% if (typeof navAutoPages !== 'undefined' && navAutoPages && typeof pages !== 'undefined' && pages && pages.length) { %>
+          <% pages.forEach(function(page) { %>
+          <a href="<%= typeof pageUrl !== 'undefined' ? pageUrl(page) : '/page/' + page.slug %>" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition"><%= page.title %></a>
+          <% }); %>
+          <% } %>
+        </nav>
+        <div class="flex items-center gap-4">
+          <a href="/admin" class="text-sm text-gray-500 hover:text-blue-600 transition">
+            <i class="bi bi-shield-lock"></i>
+          </a>
+          <button id="mobile-menu-btn" class="md:hidden text-gray-600" onclick="document.getElementById('mobile-nav').classList.toggle('hidden')">
+            <i class="bi bi-list text-xl"></i>
+          </button>
+        </div>
+      </div>
+      <div id="mobile-nav" class="hidden md:hidden pb-4 space-y-2">
+        <a href="/" class="block py-1 text-sm font-medium text-gray-600">Home</a>
+        <% if (typeof navItems !== 'undefined' && navItems && navItems.length) { %>
+        <% navItems.forEach(function(item) { %>
+        <a href="<%= item.url %>" class="block py-1 text-sm font-medium text-gray-600"><%= item.label %></a>
+        <% }); %>
+        <% } %>
+        <% if (typeof navAutoPages !== 'undefined' && navAutoPages && typeof pages !== 'undefined' && pages && pages.length) { %>
+        <% pages.forEach(function(page) { %>
+        <a href="<%= typeof pageUrl !== 'undefined' ? pageUrl(page) : '/page/' + page.slug %>" class="block py-1 text-sm font-medium text-gray-600"><%= page.title %></a>
+        <% }); %>
+        <% } %>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1">

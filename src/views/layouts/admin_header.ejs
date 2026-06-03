@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' && title ? title + ' | ' : '' %>Admin - Blog CMS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    .sidebar-link {
+      transition: all 0.2s;
+    }
+
+    .sidebar-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-link.active {
+      background: rgba(255, 255, 255, 0.15);
+      border-left: 3px solid #3b82f6;
+    }
+
+    /* Collapsible sidebar */
+    .sidebar-wrap {
+      transition: width 0.25s ease;
+      overflow: hidden;
+    }
+
+    .sidebar-wrap.collapsed {
+      width: 64px !important;
+    }
+
+    .sidebar-wrap.collapsed .sidebar-label {
+      display: none;
+    }
+
+    .sidebar-wrap.collapsed .sidebar-brand-text {
+      display: none;
+    }
+
+    .sidebar-wrap.collapsed nav a {
+      justify-content: center;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    .sidebar-wrap.collapsed hr {
+      margin-left: 0.75rem;
+      margin-right: 0.75rem;
+    }
+
+    .sidebar-toggle-btn {
+      cursor: pointer;
+      transition: transform 0.25s ease;
+    }
+
+    .sidebar-wrap.collapsed .sidebar-toggle-btn {
+      transform: rotate(180deg);
+    }
+
+    /* Tooltip for collapsed sidebar */
+    .sidebar-wrap.collapsed nav a {
+      position: relative;
+    }
+
+    .sidebar-wrap.collapsed nav a:hover::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 100%;
+      margin-left: 10px;
+      background: #1f2937;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      white-space: nowrap;
+      z-index: 50;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+    }
+
+    /* ─── Dark Mode ─── */
+    /* ─── Dark Mode — Deep Space ─── */
+    html.dark {
+      background: #0b1120;
+    }
+
+    html.dark body {
+      background: #0b1120;
+      color: #e2e8f0;
+    }
+
+    /* Surfaces */
+    html.dark .bg-white {
+      background: #151d2d !important;
+    }
+
+    html.dark .bg-gray-50 {
+      background: #111827 !important;
+    }
+
+    html.dark .bg-gray-100 {
+      background: #182235 !important;
+    }
+
+    html.dark .bg-red-50 {
+      background: #2d1b1b !important;
+    }
+
+    html.dark .bg-green-50 {
+      background: #0f2a1e !important;
+    }
+
+    html.dark .bg-blue-50 {
+      background: #0f2647 !important;
+    }
+
+    html.dark .bg-yellow-50 {
+      background: #2a2615 !important;
+    }
+
+    /* Text hierarchy */
+    html.dark .text-gray-900 {
+      color: #f1f5f9 !important;
+    }
+
+    html.dark .text-gray-700 {
+      color: #cbd5e1 !important;
+    }
+
+    html.dark .text-gray-600 {
+      color: #94a3b8 !important;
+    }
+
+    html.dark .text-gray-500 {
+      color: #6b7f99 !important;
+    }
+
+    html.dark .text-gray-400 {
+      color: #4b5e7a !important;
+    }
+
+    html.dark .text-red-700 {
+      color: #f87171 !important;
+    }
+
+    html.dark .text-green-700 {
+      color: #4ade80 !important;
+    }
+
+    html.dark .text-blue-600 {
+      color: #60a5fa !important;
+    }
+
+    html.dark .text-blue-700 {
+      color: #60a5fa !important;
+    }
+
+    html.dark .text-yellow-700 {
+      color: #fbbf24 !important;
+    }
+
+    /* Borders */
+    html.dark .border-gray-200 {
+      border-color: #253040 !important;
+    }
+
+    html.dark .border-gray-100 {
+      border-color: #1a2538 !important;
+    }
+
+    html.dark .border-gray-300 {
+      border-color: #30405a !important;
+    }
+
+    html.dark .border-red-200 {
+      border-color: #4a2222 !important;
+    }
+
+    html.dark .border-green-200 {
+      border-color: #1a3d2a !important;
+    }
+
+    html.dark .border-blue-200 {
+      border-color: #1a3555 !important;
+    }
+
+    /* Shadow refinement */
+    html.dark .shadow-sm {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    html.dark .shadow-md {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Form controls */
+    html.dark input,
+    html.dark textarea,
+    html.dark select {
+      background: #0d1424 !important;
+      color: #e2e8f0 !important;
+      border-color: #30405a !important;
+    }
+
+    html.dark input:focus,
+    html.dark textarea:focus,
+    html.dark select:focus {
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    html.dark input::placeholder,
+    html.dark textarea::placeholder {
+      color: #4b5e7a !important;
+    }
+
+    /* Buttons */
+    html.dark .bg-blue-600 {
+      background: #2563eb !important;
+    }
+
+    html.dark .bg-blue-600:hover {
+      background: #1d4ed8 !important;
+    }
+
+    html.dark .hover\:bg-blue-700:hover {
+      background: #1d4ed8 !important;
+    }
+
+    /* Status badges */
+    html.dark .bg-green-100 {
+      background: #0f2a1e !important;
+    }
+
+    html.dark .bg-yellow-100 {
+      background: #2a2615 !important;
+    }
+
+    html.dark .bg-red-100 {
+      background: #2d1b1b !important;
+    }
+
+    html.dark .bg-blue-100 {
+      background: #0f2647 !important;
+    }
+
+    /* Hover states */
+    html.dark .hover\:bg-gray-50:hover {
+      background: #1a2538 !important;
+    }
+
+    html.dark .hover\:bg-gray-100:hover {
+      background: #1e2a40 !important;
+    }
+
+    html.dark .hover\:bg-gray-200:hover {
+      background: #253551 !important;
+    }
+
+    html.dark a.hover\:text-blue-600:hover {
+      color: #60a5fa !important;
+    }
+
+    html.dark a.hover\:text-red-600:hover {
+      color: #f87171 !important;
+    }
+
+    /* Tables */
+    html.dark table .bg-gray-50 {
+      background: #111827 !important;
+    }
+
+    html.dark table .hover\:bg-gray-50:hover {
+      background: #182235 !important;
+    }
+
+    /* Quill editor dark mode */
+    html.dark .ql-editor {
+      color: #e2e8f0 !important;
+    }
+
+    html.dark .ql-toolbar {
+      background: #151d2d !important;
+      border-color: #30405a !important;
+    }
+
+    html.dark .ql-container {
+      border-color: #30405a !important;
+    }
+
+    html.dark .ql-stroke {
+      stroke: #94a3b8 !important;
+    }
+
+    html.dark .ql-fill {
+      fill: #94a3b8 !important;
+    }
+
+    html.dark .ql-picker-label {
+      color: #94a3b8 !important;
+    }
+
+    html.dark .ql-picker-options {
+      background: #1a2538 !important;
+      border-color: #30405a !important;
+    }
+
+    /* Delete buttons */
+    html.dark .text-red-400 {
+      color: #f87171 !important;
+    }
+
+    html.dark .hover\:text-red-300:hover {
+      color: #fca5a5 !important;
+    }
+
+    html.dark .hover\:text-red-600:hover {
+      color: #ef4444 !important;
+    }
+
+    /* hr */
+    html.dark hr {
+      border-color: #253040 !important;
+    }
+
+    /* File input button */
+    html.dark .file\:bg-blue-50::file-selector-button {
+      background: #0f2647 !important;
+      color: #60a5fa !important;
+    }
+
+    html.dark .hover\:file\:bg-blue-100::file-selector-button:hover {
+      background: #1a3555 !important;
+    }
+
+    /* Gradient hero */
+    html.dark .bg-gradient-to-br {
+      background: linear-gradient(to bottom right, #0b1120, #151d2d) !important;
+    }
+
+    html.dark .from-gray-50 {
+      --tw-gradient-from: #111827 !important;
+    }
+
+    html.dark .to-white {
+      --tw-gradient-to: #151d2d !important;
+    }
+
+    /* Sidebar remains its own dark color (bg-gray-900) */
+  </style>
+  <script>
+    (function() {
+      var dark = localStorage.getItem('adminDarkMode') === 'true';
+      if (dark) document.documentElement.classList.add('dark');
+    })();
+  </script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex">
+  <!-- Sidebar -->
+  <aside id="adminSidebar" class="sidebar-wrap w-64 bg-gray-900 text-white flex-shrink-0 min-h-screen">
+    <div class="p-4 border-b border-gray-700 flex items-center gap-2">
+      <i class="bi bi-shield-check text-xl"></i>
+      <h1 class="sidebar-brand-text text-xl font-bold flex-1">BlogCMS</h1>
+    </div>
+    <nav class="p-2 space-y-1">
+      <a href="/admin" data-label="Dashboard" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= typeof path !== 'undefined' && path === '/admin' ? 'active' : '' %>">
+        <i class="bi bi-speedometer2 text-lg"></i> <span class="sidebar-label">Dashboard</span>
+      </a>
+      <a href="/admin/posts" data-label="Posts" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= typeof path !== 'undefined' && path && path.startsWith('/admin/posts') ? 'active' : '' %>">
+        <i class="bi bi-file-text text-lg"></i> <span class="sidebar-label">Posts</span>
+      </a>
+      <a href="/admin/pages" data-label="Pages" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= typeof path !== 'undefined' && path && path.startsWith('/admin/pages') ? 'active' : '' %>">
+        <i class="bi bi-files text-lg"></i> <span class="sidebar-label">Pages</span>
+      </a>
+      <a href="/admin/categories" data-label="Categories" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= typeof path !== 'undefined' && path && path.startsWith('/admin/categories') ? 'active' : '' %>">
+        <i class="bi bi-tags text-lg"></i> <span class="sidebar-label">Categories</span>
+      </a>
+      <a href="/admin/tags" data-label="Tags" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= typeof path !== 'undefined' && path && path.startsWith('/admin/tags') ? 'active' : '' %>">
+        <i class="bi bi-bookmark text-lg"></i> <span class="sidebar-label">Tags</span>
+      </a>
+      <a href="/admin/comments" data-label="Comments" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= typeof path !== 'undefined' && path && path.startsWith('/admin/comments') ? 'active' : '' %>">
+        <i class="bi bi-chat-dots text-lg"></i> <span class="sidebar-label">Comments</span>
+      </a>
+      <a href="/admin/media" data-label="Media" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= typeof path !== 'undefined' && path && path.startsWith('/admin/media') ? 'active' : '' %>">
+        <i class="bi bi-images text-lg"></i> <span class="sidebar-label">Media</span>
+      </a>
+      <hr class="border-gray-700 my-2">
+      <a href="/admin/users" data-label="Users" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= typeof path !== 'undefined' && path && path.startsWith('/admin/users') ? 'active' : '' %>">
+        <i class="bi bi-people text-lg"></i> <span class="sidebar-label">Users</span>
+      </a>
+      <a href="/admin/themes" data-label="Themes" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= typeof path !== 'undefined' && path && path.startsWith('/admin/themes') ? 'active' : '' %>">
+        <i class="bi bi-palette text-lg"></i> <span class="sidebar-label">Themes</span>
+      </a>
+      <a href="/admin/audit-logs" data-label="Audit Logs" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= typeof path !== 'undefined' && path && path.startsWith('/admin/audit-logs') ? 'active' : '' %>">
+        <i class="bi bi-journal-text text-lg"></i> <span class="sidebar-label">Audit Logs</span>
+      </a>
+      <a href="/admin/settings" data-label="Settings" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded <%= typeof path !== 'undefined' && path && (path.startsWith('/admin/settings') || path.startsWith('/admin/navigation')) ? 'active' : '' %>">
+        <i class="bi bi-gear text-lg"></i> <span class="sidebar-label">Settings</span>
+      </a>
+      <a href="/admin/navigation" data-label="Navigation" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded pl-10 text-sm <%= typeof path !== 'undefined' && path && path.startsWith('/admin/navigation') ? 'active' : '' %>" style="font-size:0.85rem">
+        <i class="bi bi-list-ul text-sm"></i> <span class="sidebar-label">Navigation</span>
+      </a>
+      <hr class="border-gray-700 my-2">
+      <a href="/" target="_blank" data-label="View Site" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded">
+        <i class="bi bi-box-arrow-up-right text-lg"></i> <span class="sidebar-label">View Site</span>
+      </a>
+      <button onclick="toggleDarkMode()" data-label="Dark Mode" class="sidebar-link w-full flex items-center gap-3 px-3 py-2 rounded text-gray-300 hover:text-white">
+        <i class="bi bi-moon-stars text-lg"></i> <span class="sidebar-label" id="darkModeLabel">Dark Mode</span>
+      </button>
+      <a href="/admin/logout" data-label="Logout" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-red-400 hover:text-red-300">
+        <i class="bi bi-box-arrow-left text-lg"></i> <span class="sidebar-label">Logout</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <!-- Top Bar -->
+    <header class="bg-white shadow-sm border-b px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button id="sidebarToggle" class="sidebar-toggle-btn text-gray-500 hover:text-gray-700 transition text-xl" title="Toggle sidebar">
+          <i class="bi bi-layout-sidebar"></i>
+        </button>
+        <h2 class="text-lg font-semibold text-gray-700"><%= typeof title !== 'undefined' ? title : 'Dashboard' %></h2>
+      </div>
+      <div class="flex items-center gap-3 text-sm text-gray-600">
+        <i class="bi bi-person-circle text-xl"></i>
+        <span><%= typeof currentUser !== 'undefined' && currentUser ? currentUser.username : 'Guest' %></span>
+        <span class="px-2 py-0.5 bg-gray-200 rounded text-xs capitalize"><%= typeof currentUser !== 'undefined' && currentUser ? currentUser.role : '' %></span>
+      </div>
+    </header>
+
+    <main class="flex-1 p-6 overflow-y-auto">

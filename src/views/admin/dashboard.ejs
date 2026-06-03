@@ -1,0 +1,123 @@
+<%- include('../layouts/admin_header') %>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Posts</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1"><%= stats.postCount %></p>
+      </div>
+      <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+        <i class="bi bi-file-text text-blue-600 text-lg"></i>
+      </div>
+    </div>
+    <a href="/admin/posts" class="text-sm text-blue-600 hover:underline mt-3 inline-block">Manage Posts &rarr;</a>
+  </div>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Pages</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1"><%= stats.pageCount %></p>
+      </div>
+      <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+        <i class="bi bi-files text-green-600 text-lg"></i>
+      </div>
+    </div>
+    <a href="/admin/pages" class="text-sm text-green-600 hover:underline mt-3 inline-block">Manage Pages &rarr;</a>
+  </div>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Comments</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1"><%= stats.commentCount %></p>
+      </div>
+      <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+        <i class="bi bi-chat-dots text-purple-600 text-lg"></i>
+      </div>
+    </div>
+    <% if (stats.pendingComments > 0) { %>
+    <a href="/admin/comments" class="text-sm text-purple-600 hover:underline mt-3 inline-block">
+      <%= stats.pendingComments %> pending &rarr;
+    </a>
+    <% } else { %>
+    <a href="/admin/comments" class="text-sm text-purple-600 hover:underline mt-3 inline-block">Manage &rarr;</a>
+    <% } %>
+  </div>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Users</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1"><%= stats.userCount %></p>
+      </div>
+      <div class="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+        <i class="bi bi-people text-orange-600 text-lg"></i>
+      </div>
+    </div>
+    <a href="/admin/users" class="text-sm text-orange-600 hover:underline mt-3 inline-block">Manage Users &rarr;</a>
+  </div>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Pending</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1"><%= stats.pendingComments %></p>
+      </div>
+      <div class="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center">
+        <i class="bi bi-exclamation-circle text-red-600 text-lg"></i>
+      </div>
+    </div>
+    <p class="text-sm text-gray-400 mt-3">Comments to moderate</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- Recent Posts -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-semibold text-gray-900">Recent Posts</h3>
+      <a href="/admin/posts" class="text-sm text-blue-600 hover:underline">View all</a>
+    </div>
+    <% if (recentPosts && recentPosts.length) { %>
+    <div class="space-y-3">
+      <% recentPosts.forEach(function(post) { %>
+      <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-gray-900 truncate"><%= post.title %></p>
+          <p class="text-xs text-gray-500">
+            by <%= post.author ? post.author.username : 'Unknown' %> &middot;
+            <%= new Date(post.createdAt).toLocaleDateString() %>
+          </p>
+        </div>
+        <span class="ml-2 px-2 py-0.5 text-xs font-medium rounded <%= post.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' %>">
+          <%= post.status %>
+        </span>
+      </div>
+      <% }); %>
+    </div>
+    <% } else { %>
+    <p class="text-sm text-gray-500 py-4 text-center">No posts yet.</p>
+    <% } %>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+    <h3 class="font-semibold text-gray-900 mb-4">Quick Actions</h3>
+    <div class="grid grid-cols-2 gap-3">
+      <a href="/admin/posts/new" class="flex flex-col items-center gap-2 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
+        <i class="bi bi-plus-circle text-blue-600 text-xl"></i>
+        <span class="text-sm font-medium text-blue-700">New Post</span>
+      </a>
+      <a href="/admin/pages/new" class="flex flex-col items-center gap-2 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition">
+        <i class="bi bi-plus-circle text-green-600 text-xl"></i>
+        <span class="text-sm font-medium text-green-700">New Page</span>
+      </a>
+      <a href="/admin/categories" class="flex flex-col items-center gap-2 p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition">
+        <i class="bi bi-tags text-purple-600 text-xl"></i>
+        <span class="text-sm font-medium text-purple-700">Categories</span>
+      </a>
+      <a href="/admin/media" class="flex flex-col items-center gap-2 p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition">
+        <i class="bi bi-images text-orange-600 text-xl"></i>
+        <span class="text-sm font-medium text-orange-700">Media</span>
+      </a>
+    </div>
+  </div>
+</div>
+<%- include('../layouts/admin_footer') %>

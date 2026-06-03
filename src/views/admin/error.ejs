@@ -1,0 +1,10 @@
+<%- include('../layouts/admin_header') %>
+<div class="max-w-lg mx-auto text-center py-12">
+  <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+    <i class="bi bi-exclamation-triangle text-red-600 text-2xl"></i>
+  </div>
+  <h1 class="text-2xl font-bold text-gray-900 mb-2"><%= title %></h1>
+  <p class="text-gray-500"><%= message %></p>
+  <a href="/admin" class="inline-block mt-6 text-blue-600 hover:underline">&larr; Back to Dashboard</a>
+</div>
+<%- include('../layouts/admin_footer') %>

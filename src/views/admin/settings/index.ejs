@@ -1,0 +1,320 @@
+<%- include('../../layouts/admin_header') %>
+
+<div class="max-w-3xl">
+  <h1 class="text-2xl font-bold text-gray-900 mb-6">Settings</h1>
+
+  <% if (typeof success !== 'undefined' && success) { %>
+  <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4 flex items-center gap-2 text-sm">
+    <i class="bi bi-check-circle"></i> <%= success %>
+  </div>
+  <% } %>
+
+  <div class="space-y-6">
+    <form action="/admin/settings" method="POST" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-5">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <!-- ─── General ─── -->
+      <div>
+        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <i class="bi bi-gear"></i> General
+        </h2>
+        <div class="space-y-4">
+          <div>
+            <label for="siteName" class="block text-sm font-medium text-gray-700 mb-1">Site Name</label>
+            <input type="text" id="siteName" name="siteName" value="<%= typeof settings !== 'undefined' ? settings.siteName || 'My Blog' : 'My Blog' %>" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+            <p class="text-xs text-gray-400 mt-1">The name displayed in the blog header and title tags.</p>
+          </div>
+          <div>
+            <label for="siteTagline" class="block text-sm font-medium text-gray-700 mb-1">Tagline</label>
+            <input type="text" id="siteTagline" name="siteTagline" value="<%= typeof settings !== 'undefined' ? settings.siteTagline || '' : '' %>" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="A short description of your blog">
+            <p class="text-xs text-gray-400 mt-1">Briefly describes your site. Used in the site header and meta description fallback.</p>
+          </div>
+          <div>
+            <label for="postsPerPage" class="block text-sm font-medium text-gray-700 mb-1">Posts Per Page</label>
+            <input type="number" id="postsPerPage" name="postsPerPage" value="<%= typeof settings !== 'undefined' ? settings.postsPerPage || '6' : '6' %>" min="1" max="50" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm max-w-[120px]">
+            <p class="text-xs text-gray-400 mt-1">Number of posts shown on the blog homepage.</p>
+          </div>
+          <div>
+            <label for="titleSeparator" class="block text-sm font-medium text-gray-700 mb-1">Title Separator</label>
+            <select id="titleSeparator" name="titleSeparator" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm max-w-[200px]">
+              <% var sep = typeof settings !== 'undefined' ? settings.titleSeparator || '|' : '|'; %>
+              <option value="|" <%= sep === '|' ? 'selected' : '' %>>| (pipe)</option>
+              <option value="—" <%= sep === '—' ? 'selected' : '' %>>— (em dash)</option>
+              <option value="–" <%= sep === '–' ? 'selected' : '' %>>– (en dash)</option>
+              <option value="•" <%= sep === '•' ? 'selected' : '' %>>• (bullet)</option>
+              <option value="›" <%= sep === '›' ? 'selected' : '' %>>› (chevron)</option>
+              <option value="-" <%= sep === '-' ? 'selected' : '' %>>- (hyphen)</option>
+            </select>
+            <p class="text-xs text-gray-400 mt-1">Character used between site name and page title (e.g. "Page Title | Site Name").</p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="border-gray-200">
+
+      <!-- ─── Homepage SEO ─── -->
+      <div>
+        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <i class="bi bi-house-door"></i> Homepage SEO
+        </h2>
+        <div class="space-y-4">
+          <div>
+            <label for="homepageSeoTitle" class="block text-sm font-medium text-gray-700 mb-1">SEO Title</label>
+            <input type="text" id="homepageSeoTitle" name="homepageSeoTitle" value="<%= typeof settings !== 'undefined' ? settings.homepageSeoTitle || '' : '' %>" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Leave blank to use site name">
+            <p class="text-xs text-gray-400 mt-1">Custom &lt;title&gt; tag for the homepage. Falls back to site name.</p>
+          </div>
+          <div>
+            <label for="homepageMetaDescription" class="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
+            <textarea id="homepageMetaDescription" name="homepageMetaDescription" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-y" placeholder="Describe your blog for search results"><%= typeof settings !== 'undefined' ? settings.homepageMetaDescription || '' : '' %></textarea>
+            <p class="text-xs text-gray-400 mt-1">Used in the homepage &lt;meta name=&quot;description&quot;&gt; tag.</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Default OG Image</label>
+            <div class="flex gap-2">
+              <input type="text" id="homepageOgImage" name="homepageOgImage" value="<%= typeof settings !== 'undefined' ? settings.homepageOgImage || '' : '' %>" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Default image for social sharing">
+              <button type="button" onclick="openMediaModal(function(url, path) { document.getElementById('homepageOgImage').value = path; showOgPreview(path); })" class="px-3 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm border border-gray-300 whitespace-nowrap">
+                <i class="bi bi-images"></i> Browse
+              </button>
+            </div>
+            <div id="ogPreviewWrap" class="mt-2 <%= typeof settings !== 'undefined' && settings.homepageOgImage ? '' : 'hidden' %>">
+              <img id="ogPreview" src="<%= typeof settings !== 'undefined' ? settings.homepageOgImage || '' : '' %>" class="max-h-20 rounded border border-gray-200" alt="OG preview">
+              <button type="button" onclick="document.getElementById('homepageOgImage').value='';document.getElementById('ogPreviewWrap').classList.add('hidden');" class="text-xs text-red-500 hover:text-red-700 mt-1 flex items-center gap-1">
+                <i class="bi bi-x-circle"></i> Remove
+              </button>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Default image shown when your homepage is shared on social media.</p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="border-gray-200">
+
+      <!-- ─── Social Profiles ─── -->
+      <div>
+        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <i class="bi bi-share"></i> Social Profiles
+        </h2>
+        <p class="text-xs text-gray-500 mb-3">Used in social media meta tags and Schema.org markup.</p>
+        <div class="space-y-4">
+          <div>
+            <label for="twitterUsername" class="block text-sm font-medium text-gray-700 mb-1">
+              <i class="bi bi-twitter-x text-blue-500"></i> Twitter / X Username
+            </label>
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-400">@</span>
+              <input type="text" id="twitterUsername" name="twitterUsername" value="<%= typeof settings !== 'undefined' ? settings.twitterUsername || '' : '' %>" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="username">
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Used in twitter:site meta tag. Include only the handle (without @).</p>
+          </div>
+          <div>
+            <label for="facebookUrl" class="block text-sm font-medium text-gray-700 mb-1">
+              <i class="bi bi-facebook text-blue-600"></i> Facebook Page URL
+            </label>
+            <input type="url" id="facebookUrl" name="facebookUrl" value="<%= typeof settings !== 'undefined' ? settings.facebookUrl || '' : '' %>" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="https://facebook.com/yourpage">
+            <p class="text-xs text-gray-400 mt-1">Used in Schema.org sameAs markup.</p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="border-gray-200">
+
+      <!-- ─── Search Engines ─── -->
+      <div>
+        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <i class="bi bi-search"></i> Search Engines
+        </h2>
+        <div class="space-y-4">
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input type="hidden" name="noindexSite" value="false">
+            <input type="checkbox" id="noindexSite" name="noindexSite" value="true" <%= typeof settings !== 'undefined' && settings.noindexSite === 'true' || settings.noindexSite === true ? 'checked' : '' %> class="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            <div>
+              <span class="text-sm font-medium text-gray-700">Discourage search engines from indexing this site</span>
+              <p class="text-xs text-gray-400 mt-0.5">Adds a &lt;meta name=&quot;robots&quot; content=&quot;noindex&quot;&gt; tag to all pages. Useful for development sites.</p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <hr class="border-gray-200">
+
+      <!-- ─── Permalinks ─── -->
+      <div>
+        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <i class="bi bi-link-45deg"></i> Permalinks
+        </h2>
+        <p class="text-xs text-gray-500 mb-3">Choose the URL structure for your posts and taxonomy archives.</p>
+
+        <div class="space-y-4">
+          <!-- Preset radio buttons -->
+          <div>
+            <label class="text-sm font-medium text-gray-700 block mb-2">Common Settings</label>
+            <div class="space-y-2">
+              <% 
+                var currentStructure = typeof settings !== 'undefined' ? settings.permalinkStructure || '/post/%postname%/' : '/post/%postname%/';
+                var presets = {
+                  'default': { label: 'Default', value: '/post/%postname%/', desc: '/post/sample-post/' },
+                  'postname': { label: 'Post name', value: '/%postname%/', desc: '/sample-post/' },
+                  'day_name': { label: 'Day and name', value: '/%year%/%monthnum%/%day%/%postname%/', desc: '/2024/06/03/sample-post/' },
+                  'month_name': { label: 'Month and name', value: '/%year%/%monthnum%/%postname%/', desc: '/2024/06/sample-post/' },
+                  'numeric': { label: 'Numeric', value: '/archives/%post_id%/', desc: '/archives/42/' },
+                };
+                var selectedPreset = '';
+                for (var key in presets) {
+                  if (currentStructure === presets[key].value) { selectedPreset = key; break; }
+                }
+              %>
+              <% for (var key in presets) { var p = presets[key]; %>
+              <label class="flex items-center gap-3 p-3 rounded-lg border <%= selectedPreset === key ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-gray-300' %> cursor-pointer transition preset-option" data-value="<%= p.value %>">
+                <input type="radio" name="permalinkPreset" value="<%= key %>" <%= selectedPreset === key ? 'checked' : '' %> class="mt-0.5 text-blue-600 focus:ring-blue-500" onchange="selectPreset(this)">
+                <div>
+                  <span class="text-sm font-medium text-gray-700"><%= p.label %></span>
+                  <p class="text-xs text-gray-400 font-mono"><%= p.desc %></p>
+                </div>
+              </label>
+              <% } %>
+              <!-- Custom -->
+              <label class="flex items-center gap-3 p-3 rounded-lg border <%= !selectedPreset ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-gray-300' %> cursor-pointer transition" onclick="document.getElementById('permalinkCustom').focus(); document.querySelector('input[name=permalinkPreset][value=custom]').checked = true;">
+                <input type="radio" name="permalinkPreset" value="custom" <%= !selectedPreset ? 'checked' : '' %> class="mt-0.5 text-blue-600 focus:ring-blue-500">
+                <div>
+                  <span class="text-sm font-medium text-gray-700">Custom Structure</span>
+                  <p class="text-xs text-gray-400">Define your own pattern with structure tags</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Custom structure input -->
+          <div>
+            <label for="permalinkStructure" class="block text-sm font-medium text-gray-700 mb-1">Custom Pattern</label>
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-400 font-mono">/</span>
+              <input type="text" id="permalinkStructure" name="permalinkStructure" value="<%= currentStructure.replace(/^\//, '') %>" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono" placeholder="%year%/%monthnum%/%postname%/">
+            </div>
+            <div id="permalinkPreview" class="mt-2 text-xs text-gray-500 font-mono bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
+              Example: <span id="previewUrl">/post/sample-post/</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">
+              Available tags:
+              <code class="text-blue-600 bg-blue-50 px-1 rounded">%postname%</code>
+              <code class="text-blue-600 bg-blue-50 px-1 rounded">%post_id%</code>
+              <code class="text-blue-600 bg-blue-50 px-1 rounded">%year%</code>
+              <code class="text-blue-600 bg-blue-50 px-1 rounded">%monthnum%</code>
+              <code class="text-blue-600 bg-blue-50 px-1 rounded">%day%</code>
+              <code class="text-blue-600 bg-blue-50 px-1 rounded">%category%</code>
+              <code class="text-blue-600 bg-blue-50 px-1 rounded">%author%</code>
+            </p>
+          </div>
+
+          <!-- Category/Tag base -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="categoryBase" class="block text-sm font-medium text-gray-700 mb-1">Category Base</label>
+              <div class="flex items-center gap-1">
+                <span class="text-sm text-gray-400">/</span>
+                <input type="text" id="categoryBase" name="categoryBase" value="<%= typeof settings !== 'undefined' ? settings.categoryBase || 'category' : 'category' %>" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="category">
+              </div>
+              <p class="text-xs text-gray-400 mt-1">e.g. /<strong id="catBaseExample">category</strong>/tech/</p>
+            </div>
+            <div>
+              <label for="tagBase" class="block text-sm font-medium text-gray-700 mb-1">Tag Base</label>
+              <div class="flex items-center gap-1">
+                <span class="text-sm text-gray-400">/</span>
+                <input type="text" id="tagBase" name="tagBase" value="<%= typeof settings !== 'undefined' ? settings.tagBase || 'tag' : 'tag' %>" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="tag">
+              </div>
+              <p class="text-xs text-gray-400 mt-1">e.g. /<strong id="tagBaseExample">tag</strong>/javascript/</p>
+            </div>
+          </div>
+
+          <!-- Trailing slash -->
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input type="hidden" name="permalinkTrailingSlash" value="false">
+            <input type="checkbox" id="permalinkTrailingSlash" name="permalinkTrailingSlash" value="true" <%= typeof settings !== 'undefined' && (settings.permalinkTrailingSlash === 'true' || settings.permalinkTrailingSlash === true || settings.permalinkTrailingSlash === undefined) ? 'checked' : 'checked' %> class="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            <div>
+              <span class="text-sm font-medium text-gray-700">Add trailing slashes to URLs</span>
+              <p class="text-xs text-gray-400 mt-0.5">When checked, URLs end with a trailing slash (e.g. /post/sample-post/). Uncheck for no trailing slash (e.g. /post/sample-post).</p>
+            </div>
+          </label>
+
+          <!-- Warning -->
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+            <i class="bi bi-exclamation-triangle text-amber-500 mt-0.5"></i>
+            <div>
+              <p class="text-sm font-medium text-amber-800">Important</p>
+              <p class="text-xs text-amber-700 mt-1">
+                Changing your permalink structure changes all post URLs. Old URLs will automatically
+                301-redirect to the new URLs for the last 5 structure changes. Update your sitemap
+                after making changes.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-gray-200">
+        <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm">
+          <i class="bi bi-check-lg"></i> Save Settings
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function showOgPreview(path) {
+    document.getElementById('ogPreviewWrap').classList.remove('hidden');
+    document.getElementById('ogPreview').src = path;
+  }
+
+  // Permalink preview
+  function updatePermalinkPreview() {
+    var input = document.getElementById('permalinkStructure');
+    var preview = document.getElementById('previewUrl');
+    var val = input.value.trim() || 'post/%postname%/';
+    if (!val.startsWith('/')) val = '/' + val;
+
+    // Show example with sample data
+    var example = val
+      .replace(/%postname%/g, 'sample-post')
+      .replace(/%post_id%/g, '42')
+      .replace(/%year%/g, '2024')
+      .replace(/%monthnum%/g, '06')
+      .replace(/%day%/g, '03')
+      .replace(/%category%/g, 'tech')
+      .replace(/%author%/g, 'admin');
+
+    example = example.replace(/\/+/g, '/');
+    preview.textContent = example;
+
+    // Update base examples
+    var catBase = document.getElementById('categoryBase').value || 'category';
+    var tagBase = document.getElementById('tagBase').value || 'tag';
+    document.getElementById('catBaseExample').textContent = catBase;
+    document.getElementById('tagBaseExample').textContent = tagBase;
+  }
+
+  function selectPreset(radio) {
+    var value = radio.getAttribute('data-value');
+    if (value) {
+      document.getElementById('permalinkStructure').value = value.replace(/^\//, '');
+      updatePermalinkPreview();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var structInput = document.getElementById('permalinkStructure');
+    structInput.addEventListener('input', function() {
+      // Uncheck preset when custom typing
+      document.querySelectorAll('input[name=permalinkPreset]').forEach(function(r) {
+        if (r.value !== 'custom') r.checked = false;
+      });
+      document.querySelector('input[name=permalinkPreset][value=custom]').checked = true;
+      updatePermalinkPreview();
+    });
+
+    document.getElementById('categoryBase').addEventListener('input', updatePermalinkPreview);
+    document.getElementById('tagBase').addEventListener('input', updatePermalinkPreview);
+
+    updatePermalinkPreview();
+  });
+</script>
+
+<%- include('../../layouts/admin_footer') %>

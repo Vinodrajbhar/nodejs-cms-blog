@@ -1,0 +1,155 @@
+<%- include('../../layouts/admin_header') %>
+
+<div class="max-w-3xl">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Navigation</h1>
+    <a href="/admin/settings" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm flex items-center gap-2">
+      <i class="bi bi-gear"></i> All Settings
+    </a>
+  </div>
+
+  <% if (typeof success !== 'undefined' && success) { %>
+  <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4 flex items-center gap-2 text-sm">
+    <i class="bi bi-check-circle"></i> <%= success %>
+  </div>
+  <% } %>
+
+  <!-- Live Preview -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+    <div class="px-6 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
+      <i class="bi bi-eye text-gray-400"></i>
+      <span class="text-sm font-medium text-gray-600">Navigation Preview</span>
+    </div>
+    <div class="px-6 py-4">
+      <div class="flex items-center gap-1 flex-wrap text-sm" id="navPreview">
+        <span class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md font-medium">Home</span>
+        <i class="bi bi-chevron-right text-gray-300 text-xs"></i>
+        <% 
+          var previewItems = typeof settings !== 'undefined' && settings.navigation ? 
+            (Array.isArray(settings.navigation) ? settings.navigation : []) : [];
+          previewItems.forEach(function(item) { 
+        %>
+        <span class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md"><%= item.label %></span>
+        <i class="bi bi-chevron-right text-gray-300 text-xs"></i>
+        <% }); %>
+        <% if (typeof settings !== 'undefined' && (settings.navAutoPages === 'true' || settings.navAutoPages === true || settings.navAutoPages === undefined)) { %>
+        <span class="px-3 py-1.5 bg-gray-100 text-gray-500 rounded-md text-xs italic">+ published pages</span>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <form action="/admin/navigation" method="POST" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <!-- Auto-pages toggle -->
+    <div>
+      <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <i class="bi bi-layers"></i> Auto-Include Pages
+      </h2>
+      <label class="flex items-start gap-3 cursor-pointer">
+        <input type="hidden" name="navAutoPages" value="false">
+        <input type="checkbox" id="navAutoPages" name="navAutoPages" value="true" <%= typeof settings !== 'undefined' && (settings.navAutoPages === 'true' || settings.navAutoPages === true) ? 'checked' : 'checked' %> class="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+        <div>
+          <span class="text-sm font-medium text-gray-700">Auto-include published pages</span>
+          <p class="text-xs text-gray-400 mt-0.5">Published pages (like "About Us") are automatically added to the navigation after your custom links.</p>
+        </div>
+      </label>
+    </div>
+
+    <hr class="border-gray-200">
+
+    <!-- Custom navigation items -->
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <i class="bi bi-link-45deg"></i> Custom Links
+        </h2>
+        <button type="button" onclick="addNavItem()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium flex items-center gap-1.5">
+          <i class="bi bi-plus-lg"></i> Add Link
+        </button>
+      </div>
+
+      <!-- Header row -->
+      <div class="hidden sm:flex items-center gap-2 px-3 py-2 text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">
+        <span class="w-6"></span>
+        <span class="flex-1">Label</span>
+        <span class="flex-1">URL</span>
+        <span class="w-10"></span>
+      </div>
+
+      <div id="navItemsContainer" class="space-y-2">
+        <% 
+          var navItems = typeof settings !== 'undefined' && settings.navigation ? 
+            (Array.isArray(settings.navigation) ? settings.navigation : []) : [];
+          if (navItems.length === 0) { 
+        %>
+        <div id="navEmptyState" class="text-center py-10 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-lg">
+          <i class="bi bi-link-45deg block text-3xl mb-2"></i>
+          No custom links yet. Click <strong>"Add Link"</strong> to create one.
+        </div>
+        <% } else { 
+          navItems.forEach(function(item, idx) { 
+        %>
+        <div class="nav-item flex items-center gap-2 bg-white rounded-lg border border-gray-200 p-3 hover:border-gray-300 transition">
+          <span class="drag-handle text-gray-300 hover:text-gray-500 cursor-grab text-base"><i class="bi bi-grip-vertical"></i></span>
+          <input type="text" name="navLabel" value="<%= item.label %>" placeholder="e.g. Blog" class="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" style="min-width:0">
+          <input type="text" name="navUrl" value="<%= item.url %>" placeholder="/blog" class="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono text-xs" style="min-width:0">
+          <button type="button" onclick="removeNavItem(this)" class="px-2 py-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition text-base" title="Remove link">
+            <i class="bi bi-trash3"></i>
+          </button>
+        </div>
+        <% }); } %>
+      </div>
+
+      <p class="text-xs text-gray-400 mt-3 flex items-center gap-1.5">
+        <i class="bi bi-info-circle"></i> Use <code class="text-gray-500 bg-gray-100 px-1 rounded">/</code> for homepage, <code class="text-gray-500 bg-gray-100 px-1 rounded">/page/slug</code> for pages, or any full URL like <code class="text-gray-500 bg-gray-100 px-1 rounded">https://example.com</code>.
+      </p>
+    </div>
+
+    <div class="pt-4 border-t border-gray-200 flex items-center gap-3">
+      <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm flex items-center gap-2">
+        <i class="bi bi-check-lg"></i> Save Navigation
+      </button>
+      <a href="/admin/settings" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+
+<script>
+  function addNavItem() {
+    var container = document.getElementById('navItemsContainer');
+    var empty = document.getElementById('navEmptyState');
+    if (empty) empty.remove();
+
+    var div = document.createElement('div');
+    div.className = 'nav-item flex items-center gap-2 bg-white rounded-lg border border-gray-200 p-3 hover:border-gray-300 transition';
+    div.innerHTML = [
+      '<span class="drag-handle text-gray-300 hover:text-gray-500 cursor-grab text-base"><i class="bi bi-grip-vertical"></i></span>',
+      '<input type="text" name="navLabel" value="" placeholder="e.g. Blog" class="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" style="min-width:0">',
+      '<input type="text" name="navUrl" value="" placeholder="/blog" class="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono text-xs" style="min-width:0">',
+      '<button type="button" onclick="removeNavItem(this)" class="px-2 py-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition text-base" title="Remove link"><i class="bi bi-trash3"></i></button>'
+    ].join('');
+    container.appendChild(div);
+    div.querySelector('input').focus();
+    updatePreview();
+  }
+
+  function removeNavItem(btn) {
+    var item = btn.closest('.nav-item');
+    item.remove();
+    var container = document.getElementById('navItemsContainer');
+    if (container.querySelectorAll('.nav-item').length === 0) {
+      container.innerHTML = '<div id="navEmptyState" class="text-center py-10 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-lg"><i class="bi bi-link-45deg block text-3xl mb-2"></i>No custom links yet. Click <strong>"Add Link"</strong> to create one.</div>';
+    }
+    updatePreview();
+  }
+
+  function updatePreview() {
+    // Simple preview update on save — for now it updates on page reload
+  }
+</script>
+
+<%- include('../../layouts/admin_footer') %>

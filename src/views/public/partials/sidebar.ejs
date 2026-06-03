@@ -1,0 +1,41 @@
+<aside class="space-y-8">
+  <!-- Search -->
+  <div>
+    <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-3">Search</h3>
+    <form action="/search" method="GET" class="flex">
+      <input type="text" name="q" placeholder="Search..." class="flex-1 px-3 py-2 border border-gray-300 rounded-l-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+      <button type="submit" class="px-3 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition text-sm">
+        <i class="bi bi-search"></i>
+      </button>
+    </form>
+  </div>
+
+  <!-- Categories -->
+  <% if (typeof categories !== 'undefined' && categories && categories.length) { %>
+  <div>
+    <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-3">Categories</h3>
+    <ul class="space-y-2">
+      <% categories.forEach(function(cat) { %>
+      <li>
+        <a href="<%= categoryUrl(cat) %>" class="flex items-center justify-between text-sm text-gray-600 hover:text-blue-600 transition">
+          <span><%= cat.name %></span>
+          <span class="text-xs text-gray-400">(<%= cat.postCount %>)</span>
+        </a>
+      </li>
+      <% }); %>
+    </ul>
+  </div>
+  <% } %>
+
+  <!-- Tags -->
+  <% if (typeof tags !== 'undefined' && tags && tags.length) { %>
+  <div>
+    <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-3">Tags</h3>
+    <div class="flex flex-wrap gap-2">
+      <% tags.forEach(function(tag) { %>
+      <a href="<%= tagUrl(tag) %>" class="text-xs px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full hover:bg-blue-50 hover:text-blue-600 transition">#<%= tag.name %></a>
+      <% }); %>
+    </div>
+  </div>
+  <% } %>
+</aside>

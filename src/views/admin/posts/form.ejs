@@ -1,0 +1,303 @@
+<%- include('../../layouts/admin_header') %>
+
+<style>
+  /* Quill editor styles */
+  .ql-editor {
+    min-height: 350px;
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+
+  .ql-editor.ql-blank::before {
+    color: #9ca3af;
+    font-style: normal;
+  }
+
+  .ql-toolbar {
+    border-radius: 0.5rem 0.5rem 0 0;
+    border-color: #d1d5db !important;
+  }
+
+  .ql-container {
+    border-radius: 0 0 0.5rem 0.5rem;
+    border-color: #d1d5db !important;
+  }
+</style>
+
+<div class="max-w-4xl">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900"><%= post ? 'Edit Post' : 'New Post' %></h1>
+      <a href="/admin/posts" class="text-sm text-gray-500 hover:text-blue-600 transition">&larr; Back to Posts</a>
+    </div>
+  </div>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+  <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 flex items-center gap-2 text-sm">
+    <i class="bi bi-exclamation-circle"></i> <%= error %>
+  </div>
+  <% } %>
+
+  <form action="/admin/posts<%= post ? '/' + post._id + '/edit' : '' %>" method="POST" class="space-y-6">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <!-- Title -->
+    <div>
+      <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+      <input type="text" id="title" name="title" value="<%= post ? post.title : '' %>" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-lg font-medium" placeholder="Enter post title">
+    </div>
+
+    <!-- Content (Quill) -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Content</label>
+      <div id="editor-container" class="bg-white"><%- post ? post.content : '' %></div>
+      <input type="hidden" name="content" id="content-input">
+    </div>
+
+    <!-- Excerpt -->
+    <div>
+      <label for="excerpt" class="block text-sm font-medium text-gray-700 mb-1">Excerpt</label>
+      <textarea id="excerpt" name="excerpt" rows="3" maxlength="500" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-y" placeholder="Brief summary of the post (shown on blog cards)"><%= post ? post.excerpt : '' %></textarea>
+      <p class="text-xs text-gray-400 mt-1">Max 500 characters</p>
+    </div>
+
+    <!-- Row: Featured Image + Status -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label for="featuredImage" class="block text-sm font-medium text-gray-700 mb-1">Featured Image</label>
+        <div class="flex gap-2">
+          <input type="text" id="featuredImage" name="featuredImage" value="<%= post ? post.featuredImage : '' %>" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Image URL or select from media library">
+          <button type="button" onclick="openMediaModal(function(url, path) { document.getElementById('featuredImage').value = path; showFeaturedPreview(path); })" class="px-3 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm border border-gray-300 whitespace-nowrap">
+            <i class="bi bi-images"></i> Browse
+          </button>
+        </div>
+        <div id="featuredPreviewWrap" class="mt-2 <%= post && post.featuredImage ? '' : 'hidden' %>">
+          <img id="featuredPreview" src="<%= post ? post.featuredImage : '' %>" class="max-h-32 rounded-lg border border-gray-200 object-cover" alt="Featured preview">
+          <button type="button" onclick="document.getElementById('featuredImage').value='';document.getElementById('featuredPreviewWrap').classList.add('hidden');" class="text-xs text-red-500 hover:text-red-700 mt-1 flex items-center gap-1">
+            <i class="bi bi-x-circle"></i> Remove
+          </button>
+        </div>
+        <p class="text-xs text-gray-400 mt-1">Choose an image from the <button type="button" onclick="openMediaModal(function(url, path) { document.getElementById('featuredImage').value = path; showFeaturedPreview(path); })" class="text-blue-600 hover:underline cursor-pointer">Media Library</button></p>
+      </div>
+      <div>
+        <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+        <select id="status" name="status" onchange="toggleScheduledAt()" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+          <option value="draft" <%= post && post.status === 'draft' ? 'selected' : '' %>>Draft</option>
+          <option value="published" <%= post && (!post || post.status === 'published') && (!post || !post.scheduledAt) ? 'selected' : '' %>>Published</option>
+          <option value="scheduled" <%= post && post.status === 'scheduled' ? 'selected' : '' %>>Scheduled</option>
+        </select>
+        <div id="scheduledAtWrap" class="mt-2 <%= post && post.status === 'scheduled' ? '' : 'hidden' %>">
+          <label for="scheduledAt" class="block text-xs font-medium text-gray-500 mb-1">Publish Date &amp; Time</label>
+          <input type="datetime-local" id="scheduledAt" name="scheduledAt" value="<%= post && post.scheduledAt ? new Date(post.scheduledAt).toISOString().slice(0, 16) : '' %>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+        </div>
+      </div>
+      <script>
+        function toggleScheduledAt() {
+          var status = document.getElementById('status').value;
+          var wrap = document.getElementById('scheduledAtWrap');
+          if (wrap) wrap.classList.toggle('hidden', status !== 'scheduled');
+        }
+      </script>
+    </div>
+
+    <!-- Row: Categories + Tags -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Categories</label>
+        <div class="space-y-2 max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg p-3">
+          <% if (categories && categories.length) { %>
+          <% categories.forEach(function(cat) { %>
+          <label class="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 px-2 py-1 rounded">
+            <input type="checkbox" name="categoryIds" value="<%= cat._id %>" <%= post && post.categories && post.categories.some(function(c) { return c.toString && c.toString() === cat._id.toString() || c === cat._id.toString() }) ? 'checked' : '' %> class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            <%= cat.name %>
+          </label>
+          <% }); %>
+          <% } else { %>
+          <p class="text-sm text-gray-400 text-center py-2">
+            No categories yet.
+            <a href="/admin/categories" class="text-blue-600 hover:underline">Create one</a>
+          </p>
+          <% } %>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+        <div class="space-y-2 max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg p-3">
+          <% if (tags && tags.length) { %>
+          <% tags.forEach(function(tag) { %>
+          <label class="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 px-2 py-1 rounded">
+            <input type="checkbox" name="tagIds" value="<%= tag._id %>" <%= post && post.tags && post.tags.some(function(t) { return t.toString && t.toString() === tag._id.toString() || t === tag._id.toString() }) ? 'checked' : '' %> class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            #<%= tag.name %>
+          </label>
+          <% }); %>
+          <% } else { %>
+          <p class="text-sm text-gray-400 text-center py-2">
+            No tags yet.
+            <a href="/admin/tags" class="text-blue-600 hover:underline">Create one</a>
+          </p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SEO Settings (collapsible) ─── -->
+    <details class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+      <summary class="px-5 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100 transition flex items-center gap-2 text-sm font-semibold text-gray-700">
+        <i class="bi bi-search-heart"></i> SEO Settings
+        <span class="ml-auto text-xs text-gray-400 font-normal"><i class="bi bi-chevron-down"></i></span>
+      </summary>
+      <div class="px-5 py-4 space-y-4 border-t border-gray-200">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="seoTitle" class="block text-sm font-medium text-gray-700 mb-1">SEO Title</label>
+            <input type="text" id="seoTitle" name="seoTitle" value="<%= post ? post.seoTitle || '' : '' %>" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Custom title for search results">
+            <p class="text-xs text-gray-400 mt-1">Leave blank to use the post title. Recommended: 50-60 characters.
+              <span id="seoTitleCount" class="text-gray-500">0</span>
+            </p>
+          </div>
+          <div>
+            <label for="breadcrumbTitle" class="block text-sm font-medium text-gray-700 mb-1">Breadcrumb Title</label>
+            <input type="text" id="breadcrumbTitle" name="breadcrumbTitle" value="<%= post ? post.breadcrumbTitle || '' : '' %>" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Shorter title for breadcrumbs">
+          </div>
+        </div>
+        <div>
+          <label for="metaDescription" class="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
+          <textarea id="metaDescription" name="metaDescription" rows="2" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-y" placeholder="Brief description for search snippets"><%= post ? post.metaDescription || '' : '' %></textarea>
+          <p class="text-xs text-gray-400 mt-1">Leave blank to use the excerpt. Recommended: 120-160 characters.
+            <span id="metaDescCount" class="text-gray-500">0</span>
+          </p>
+        </div>
+        <div>
+          <label for="focusKeyphrase" class="block text-sm font-medium text-gray-700 mb-1">Focus Keyphrase</label>
+          <input type="text" id="focusKeyphrase" name="focusKeyphrase" value="<%= post ? post.focusKeyphrase || '' : '' %>" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="e.g. node.js tutorial">
+          <p class="text-xs text-gray-400 mt-1">The primary keyword or phrase this post targets (informational only).</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Open Graph (Social Sharing)</label>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <input type="text" id="ogTitle" name="ogTitle" value="<%= post ? post.ogTitle || '' : '' %>" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="OG Title (defaults to SEO title)">
+            </div>
+            <div>
+              <input type="text" id="ogDescription" name="ogDescription" value="<%= post ? post.ogDescription || '' : '' %>" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="OG Description (defaults to meta desc)">
+            </div>
+            <div class="flex gap-2">
+              <input type="text" id="ogImage" name="ogImage" value="<%= post ? post.ogImage || '' : '' %>" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="OG Image URL">
+              <button type="button" onclick="openMediaModal(function(url, path) { document.getElementById('ogImage').value = path; })" class="px-3 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm border border-gray-300 whitespace-nowrap">
+                <i class="bi bi-images"></i>
+              </button>
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 mt-1">Customize how this post appears when shared on social media. Falls back to post title / featured image.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="canonicalUrl" class="block text-sm font-medium text-gray-700 mb-1">Canonical URL</label>
+            <input type="url" id="canonicalUrl" name="canonicalUrl" value="<%= post ? post.canonicalUrl || '' : '' %>" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="https://example.com/original-article">
+            <p class="text-xs text-gray-400 mt-1">If this content is syndicated, set the original source URL.</p>
+          </div>
+          <div class="flex items-center pt-6">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="hidden" name="noindex" value="false">
+              <input type="checkbox" name="noindex" value="true" <%= post && post.noindex ? 'checked' : '' %> class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+              <span class="text-sm text-gray-700">Hide from search engines (noindex)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-3 pt-4 border-t border-gray-200">
+      <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm">
+        <%= post ? 'Update Post' : 'Create Post' %>
+      </button>
+      <a href="/admin/posts" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-medium">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<!-- Quill.js -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script>
+  (function() {
+    var editor = new Quill('#editor-container', {
+      theme: 'snow',
+      modules: {
+        toolbar: [
+          [{
+            header: [1, 2, 3, false]
+          }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{
+            list: 'ordered'
+          }, {
+            list: 'bullet'
+          }],
+          ['blockquote', 'code-block'],
+          [{
+            align: []
+          }],
+          ['link', 'image'],
+          ['clean'],
+        ],
+      },
+      placeholder: 'Start writing your post...',
+    });
+
+    // Custom image button handler — open media modal instead of default URL prompt
+    var toolbar = editor.getModule('toolbar');
+    toolbar.addHandler('image', function() {
+      openMediaModal(function(url) {
+        var range = editor.getSelection(true);
+        editor.insertEmbed(range.index, 'image', url);
+        editor.setSelection(range.index + 1);
+      });
+    });
+
+    var form = document.querySelector('form');
+    var contentInput = document.getElementById('content-input');
+
+    form.addEventListener('submit', function() {
+      contentInput.value = editor.root.innerHTML;
+    });
+  })();
+
+  function showFeaturedPreview(path) {
+    var wrap = document.getElementById('featuredPreviewWrap');
+    var img = document.getElementById('featuredPreview');
+    img.src = path;
+    wrap.classList.remove('hidden');
+  }
+
+  // ─── SEO character counters ───
+  (function() {
+    var seoTitle = document.getElementById('seoTitle');
+    var metaDesc = document.getElementById('metaDescription');
+    var titleCount = document.getElementById('seoTitleCount');
+    var descCount = document.getElementById('metaDescCount');
+
+    if (seoTitle && titleCount) {
+      function updateTitleCount() {
+        var len = seoTitle.value.length;
+        titleCount.textContent = len;
+        titleCount.className = len > 60 ? 'text-red-500' : len > 50 ? 'text-yellow-500' : 'text-gray-500';
+      }
+      seoTitle.addEventListener('input', updateTitleCount);
+      updateTitleCount();
+    }
+
+    if (metaDesc && descCount) {
+      function updateDescCount() {
+        var len = metaDesc.value.length;
+        descCount.textContent = len;
+        descCount.className = len > 160 ? 'text-red-500' : len > 120 ? 'text-yellow-500' : 'text-gray-500';
+      }
+      metaDesc.addEventListener('input', updateDescCount);
+      updateDescCount();
+    }
+  })();
+</script>
+
+<%- include('../../layouts/admin_footer') %>
